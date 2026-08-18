@@ -3891,7 +3891,6 @@
     // To'g'ridan-to'g'ri, Telegram ilovasini ochmasdan yuboradi -- kichik
     // xavfsiz vositachi (Cloudflare Worker) orqali, bot TOKEN faqat o'sha
     // vositachida yashirin saqlanadi, bu sahifada hech qachon ko'rinmaydi.
-    var text = buildZayavkaText();
     var originalLabel = cartSendBtn.textContent;
     cartSendBtn.disabled = true;
     cartSendBtn.textContent = "Yuborilmoqda...";
@@ -3899,7 +3898,11 @@
     fetch(SEND_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: text }),
+      body: JSON.stringify({
+        warehouse: cartWarehouseSelect.value,
+        when: cartDateInput.value.trim(),
+        items: cart.map(function (it) { return { name: it.name, qty: it.qty }; }),
+      }),
     })
       .then(function (r) { return r.json(); })
       .then(function (data) {
