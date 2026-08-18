@@ -182,13 +182,30 @@
     cursor: pointer;
     padding: 4px;
   }
-  .cart-date {
-    font-size: 12px;
-    color: var(--accent);
-    font-weight: 600;
+  .cart-date-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     margin-bottom: 10px;
-    font-variant-numeric: tabular-nums;
   }
+  .cart-date-label {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .cart-date-input {
+    flex: 1;
+    font-size: 14px;
+    font-family: inherit;
+    font-variant-numeric: tabular-nums;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+  }
+  .cart-date-input:focus { outline: none; border-color: var(--accent); }
 
   ul#cartList {
     list-style: none;
@@ -400,7 +417,10 @@
     <span class="cart-title" id="cartTitle">Tanlangan (0)</span>
     <button class="cart-clear" id="cartClearBtn" type="button">Hammasini tozalash</button>
   </div>
-  <div class="cart-date" id="cartDate"></div>
+  <div class="cart-date-row">
+    <label class="cart-date-label" for="cartDateInput">📅 Vaqti</label>
+    <input type="text" class="cart-date-input" id="cartDateInput" inputmode="text" autocomplete="off" />
+  </div>
   <ul id="cartList"></ul>
   <div class="cart-actions">
     <button class="cart-send-btn" id="cartSendBtn" type="button">Guruhga yuborish</button>
@@ -3755,7 +3775,8 @@
   var cartEl = document.getElementById("cart");
   var cartListEl = document.getElementById("cartList");
   var cartTitleEl = document.getElementById("cartTitle");
-  var cartDateEl = document.getElementById("cartDate");
+  var cartDateInput = document.getElementById("cartDateInput");
+  cartDateInput.value = formatNowTashkent(); // boshlang'ich taklif -- foydalanuvchi o'zgartira oladi
   var cartClearBtn = document.getElementById("cartClearBtn");
   var cartCopyBtn = document.getElementById("cartCopyBtn");
   var cartSendBtn = document.getElementById("cartSendBtn");
@@ -3780,7 +3801,9 @@
     var lines = cart.map(function (item) {
       return item.qty.trim() ? item.name + " - " + item.qty.trim() : item.name;
     });
-    return "📅 " + formatNowTashkent() + "\n" + lines.join("\n");
+    var when = cartDateInput.value.trim();
+    var header = when ? "📅 " + when : "";
+    return (header ? header + "\n" : "") + lines.join("\n");
   }
 
   function findCartIndex(name) {
@@ -3790,7 +3813,6 @@
 
   function renderCart(focusName) {
     cartTitleEl.textContent = "Tanlangan (" + cart.length + ")";
-    cartDateEl.textContent = "📅 " + formatNowTashkent();
     cartEl.classList.toggle("has-items", cart.length > 0);
     cartListEl.innerHTML = "";
     cart.forEach(function (item, idx) {
