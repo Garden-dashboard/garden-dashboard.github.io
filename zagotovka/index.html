@@ -418,6 +418,13 @@
     <button class="cart-clear" id="cartClearBtn" type="button">Hammasini tozalash</button>
   </div>
   <div class="cart-date-row">
+    <label class="cart-date-label" for="cartWarehouseSelect">🏢 Ombor</label>
+    <select class="cart-date-input" id="cartWarehouseSelect">
+      <option value="ГАРДЕН">Garden Mangal</option>
+      <option value="Олимп кафе">Olimp 1 (kafe) Mangal</option>
+    </select>
+  </div>
+  <div class="cart-date-row">
     <label class="cart-date-label" for="cartDateInput">📅 Vaqti</label>
     <input type="text" class="cart-date-input" id="cartDateInput" inputmode="text" autocomplete="off" />
   </div>
@@ -3775,6 +3782,7 @@
   var cartEl = document.getElementById("cart");
   var cartListEl = document.getElementById("cartList");
   var cartTitleEl = document.getElementById("cartTitle");
+  var cartWarehouseSelect = document.getElementById("cartWarehouseSelect");
   var cartDateInput = document.getElementById("cartDateInput");
   cartDateInput.value = formatNowTashkent(); // boshlang'ich taklif -- foydalanuvchi o'zgartira oladi
   var cartClearBtn = document.getElementById("cartClearBtn");
@@ -3801,9 +3809,11 @@
     var lines = cart.map(function (item) {
       return item.qty.trim() ? item.name + " - " + item.qty.trim() : item.name;
     });
+    var warehouse = cartWarehouseSelect.value;
     var when = cartDateInput.value.trim();
-    var header = when ? "📅 " + when : "";
-    return (header ? header + "\n" : "") + lines.join("\n");
+    var headerLines = [warehouse];
+    if (when) headerLines.push("📅 " + when);
+    return headerLines.join("\n") + "\n" + lines.join("\n");
   }
 
   function findCartIndex(name) {
