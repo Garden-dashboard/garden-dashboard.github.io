@@ -392,9 +392,18 @@
 
   footer {
     text-align: center;
-    padding: 10px 16px 22px;
+    padding: 20px 16px 26px;
     font-size: 11px;
     color: var(--text-muted);
+  }
+  footer p { margin: 4px 0; }
+  .qr-img {
+    display: block;
+    margin: 0 auto 8px;
+    border-radius: 8px;
+    background: #fff;
+    padding: 6px;
+    box-shadow: var(--shadow);
   }
 </style>
 </head>
@@ -443,7 +452,11 @@
   <ul id="results"></ul>
 </main>
 
-<footer>Olimp Zagotovka &middot; mahalliy katalog, internetga bog'liq emas</footer>
+<footer>
+  <img src="qr.png" alt="Zayavka Qidiruv QR kodi" class="qr-img" width="120" height="120" />
+  <p>Boshqalarga ulashish uchun shu QR kodni skanerlating</p>
+  <p>Olimp Zagotovka &middot; mahalliy katalog, internetga bog'liq emas</p>
+</footer>
 
 <div id="toast"></div>
 
