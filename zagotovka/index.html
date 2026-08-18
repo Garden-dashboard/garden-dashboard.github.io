@@ -426,7 +426,7 @@
   </div>
   <div class="cart-date-row">
     <label class="cart-date-label" for="cartDateInput">📅 Vaqti</label>
-    <input type="text" class="cart-date-input" id="cartDateInput" inputmode="text" autocomplete="off" />
+    <input type="datetime-local" class="cart-date-input" id="cartDateInput" autocomplete="off" />
   </div>
   <ul id="cartList"></ul>
   <div class="cart-actions">
@@ -3784,14 +3784,13 @@
   var cartTitleEl = document.getElementById("cartTitle");
   var cartWarehouseSelect = document.getElementById("cartWarehouseSelect");
   var cartDateInput = document.getElementById("cartDateInput");
-  cartDateInput.value = formatNowTashkent(); // boshlang'ich taklif -- foydalanuvchi o'zgartira oladi
   var cartClearBtn = document.getElementById("cartClearBtn");
   var cartCopyBtn = document.getElementById("cartCopyBtn");
   var cartSendBtn = document.getElementById("cartSendBtn");
   var cart = []; // { name, qty }
 
-  function formatNowTashkent() {
-    var fmt = new Intl.DateTimeFormat("uz-UZ", {
+  function tashkentParts(date) {
+    var fmt = new Intl.DateTimeFormat("en-CA", {
       timeZone: "Asia/Tashkent",
       day: "2-digit",
       month: "2-digit",
@@ -3801,8 +3800,23 @@
       hour12: false,
     });
     var map = {};
-    fmt.formatToParts(new Date()).forEach(function (p) { map[p.type] = p.value; });
-    return map.day + "." + map.month + "." + map.year + " " + map.hour + ":" + map.minute;
+    fmt.formatToParts(date).forEach(function (p) { map[p.type] = p.value; });
+    return map;
+  }
+
+  function nowTashkentLocalValue() {
+    // <input type="datetime-local"> "YYYY-MM-DDTHH:mm" formatini talab qiladi
+    var p = tashkentParts(new Date());
+    return p.year + "-" + p.month + "-" + p.day + "T" + p.hour + ":" + p.minute;
+  }
+
+  cartDateInput.value = nowTashkentLocalValue(); // boshlang'ich taklif -- kalendardan o'zgartirsa bo'ladi
+
+  function formatDisplayDate(localValue) {
+    // "2026-08-18T18:30" -> "18.08.2026 18:30"
+    var m = localValue.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+    if (!m) return localValue;
+    return m[3] + "." + m[2] + "." + m[1] + " " + m[4] + ":" + m[5];
   }
 
   function buildZayavkaText() {
@@ -3810,7 +3824,7 @@
       return item.qty.trim() ? item.name + " - " + item.qty.trim() : item.name;
     });
     var warehouse = cartWarehouseSelect.value;
-    var when = cartDateInput.value.trim();
+    var when = cartDateInput.value ? formatDisplayDate(cartDateInput.value) : "";
     var headerLines = [warehouse];
     if (when) headerLines.push("📅 " + when);
     return headerLines.join("\n") + "\n" + lines.join("\n");
@@ -3900,7 +3914,7 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         warehouse: cartWarehouseSelect.value,
-        when: cartDateInput.value.trim(),
+        when: cartDateInput.value ? formatDisplayDate(cartDateInput.value) : "",
         items: cart.map(function (it) { return { name: it.name, qty: it.qty }; }),
       }),
     })
