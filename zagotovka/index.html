@@ -397,6 +397,18 @@
     color: var(--text-muted);
   }
   footer p { margin: 4px 0; }
+  .qr-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px !important;
+  }
+  .qr-hint {
+    max-width: 260px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    line-height: 1.5;
+  }
   .qr-img {
     display: block;
     margin: 0 auto 8px;
@@ -453,8 +465,9 @@
 </main>
 
 <footer>
+  <p class="qr-title">📱 Bu sahifaga tez kirish uchun QR kod</p>
   <img src="qr.png" alt="Zayavka Qidiruv QR kodi" class="qr-img" width="120" height="120" />
-  <p>Boshqalarga ulashish uchun shu QR kodni skanerlating</p>
+  <p class="qr-hint">Telefon kamerasi bilan skanerlang — shu sahifa (Zayavka Qidiruv) ochiladi.<br>Boshqa xodimlarga ulashish uchun shu rasmni yuborishingiz yoki ekrandan skanerlatishingiz mumkin.</p>
   <p>Olimp Zagotovka &middot; mahalliy katalog, internetga bog'liq emas</p>
 </footer>
 
