@@ -494,6 +494,26 @@
 </style>
 </head>
 <body>
+
+<div class="lock-screen" id="lockScreen">
+  <div class="lock-card">
+    <p class="lock-eyebrow">Zagotovka</p>
+    <h2 class="lock-title">Kirish</h2>
+    <form id="lockForm">
+      <div class="lock-field">
+        <label for="lockLogin">Login</label>
+        <input type="text" id="lockLogin" autocomplete="username" autocapitalize="off" spellcheck="false" />
+      </div>
+      <div class="lock-field">
+        <label for="lockPass">Parol</label>
+        <input type="password" id="lockPass" autocomplete="current-password" inputmode="numeric" />
+      </div>
+      <button type="submit" class="lock-btn">Kirish</button>
+      <p class="lock-error" id="lockError"></p>
+    </form>
+  </div>
+</div>
+
 <header>
   <p class="eyebrow">Zagotovka &middot; Ombor kataloги</p>
   <h1>Mahsulot nomini toping</h1>
