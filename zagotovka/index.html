@@ -390,6 +390,80 @@
     li.result, #toast { transition: none; }
   }
 
+  .lock-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .lock-card {
+    width: 100%;
+    max-width: 340px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 26px 22px;
+  }
+  .lock-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 4px;
+  }
+  .lock-title {
+    margin: 0 0 18px;
+    font-size: 19px;
+    font-weight: 800;
+  }
+  .lock-field {
+    margin-bottom: 12px;
+  }
+  .lock-field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+  }
+  .lock-field input {
+    width: 100%;
+    font-size: 16px;
+    font-family: inherit;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+  }
+  .lock-field input:focus { outline: none; border-color: var(--accent); }
+  .lock-btn {
+    width: 100%;
+    margin-top: 6px;
+    padding: 13px;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .lock-btn:active { opacity: 0.85; }
+  .lock-error {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--accent);
+    text-align: center;
+    min-height: 18px;
+  }
+
   footer {
     text-align: center;
     padding: 20px 16px 26px;
@@ -3642,6 +3716,25 @@
 (function () {
   "use strict";
 
+  // ---- Kirish (login/parol) ----
+  var siteAuth = { login: "", pass: "" };
+  var lockScreen = document.getElementById("lockScreen");
+  var lockForm = document.getElementById("lockForm");
+  var lockError = document.getElementById("lockError");
+  lockForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var login = document.getElementById("lockLogin").value.trim();
+    var pass = document.getElementById("lockPass").value.trim();
+    if (login === "Garden" && pass === "0038") {
+      siteAuth.login = login;
+      siteAuth.pass = pass;
+      lockScreen.style.display = "none";
+      lockError.textContent = "";
+    } else {
+      lockError.textContent = "Login yoki parol noto'g'ri";
+    }
+  });
+
   var RAW_NAMES = JSON.parse(document.getElementById("catalog-data").textContent);
 
   function buildIndex(names) {
@@ -3924,7 +4017,7 @@
     copyText(buildZayavkaText(), "Ro'yxat nusxalandi (" + cart.length + " ta)");
   });
 
-  var SEND_ENDPOINT = "https://zagotovka-zayavka-send.olimpzagotovka.workers.dev";
+  var SEND_ENDPOINT = atob("aHR0cHM6Ly96YWdvdG92a2EtemF5YXZrYS1zZW5kLm9saW1wemFnb3RvdmthLndvcmtlcnMuZGV2");
 
   cartSendBtn.addEventListener("click", function () {
     if (cart.length === 0) return;
@@ -3939,6 +4032,8 @@
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        login: siteAuth.login,
+        pass: siteAuth.pass,
         warehouse: cartWarehouseSelect.value,
         when: cartDateInput.value ? formatDisplayDate(cartDateInput.value) : "",
         items: cart.map(function (it) { return { name: it.name, qty: it.qty }; }),
