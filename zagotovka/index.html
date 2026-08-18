@@ -3827,15 +3827,40 @@
     copyText(buildZayavkaText(), "Ro'yxat nusxalandi (" + cart.length + " ta)");
   });
 
+  var SEND_ENDPOINT = "https://zagotovka-zayavka-send.olimpzagotovka.workers.dev";
+
   cartSendBtn.addEventListener("click", function () {
     if (cart.length === 0) return;
-    // Telegram'ning rasmiy "ulashish" havolasi -- bot TOKEN talab qilmaydi,
-    // xavfsiz. Telegram ochiladi, siz "Загатовка мангал" guruhini tanlab,
-    // Yuborish bosasiz (odatda 1-2 marta bosish, chat tez-tez ishlatilgani
-    // uchun ro'yxat boshida turadi).
+    // To'g'ridan-to'g'ri, Telegram ilovasini ochmasdan yuboradi -- kichik
+    // xavfsiz vositachi (Cloudflare Worker) orqali, bot TOKEN faqat o'sha
+    // vositachida yashirin saqlanadi, bu sahifada hech qachon ko'rinmaydi.
     var text = buildZayavkaText();
-    var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(text);
-    window.open(shareUrl, "_blank");
+    var originalLabel = cartSendBtn.textContent;
+    cartSendBtn.disabled = true;
+    cartSendBtn.textContent = "Yuborilmoqda...";
+
+    fetch(SEND_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: text }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.ok) {
+          showToast("Guruhga yuborildi ✓");
+          cart = [];
+          renderCart();
+        } else {
+          showToast("Xato: " + (data.error || "yuborilmadi"));
+        }
+      })
+      .catch(function () {
+        showToast("Ulanishda xato — internetni tekshiring");
+      })
+      .finally(function () {
+        cartSendBtn.disabled = false;
+        cartSendBtn.textContent = originalLabel;
+      });
   });
 
   var EXAMPLES = ["qusqavoy", "gijduvon", "ijjon shashlik", "krilishka"];
@@ -3950,5 +3975,3 @@
 </script>
 </body>
 </html>
-
-
