@@ -2301,7 +2301,11 @@
 (function () {
   "use strict";
 
-  // ---- Kirish (login/parol) ----
+  // ---- Kirish (login/parol) -- har login faqat o'ziga tegishli omborlarni ko'radi ----
+  var ROLES = {
+    "Garden": { pass: "0038", warehouses: ["ГАРДЕН"] },
+    "Olimp": { pass: "0038", warehouses: ["Олимп кафе", "Упаковка"] },
+  };
   var siteAuth = { login: "", pass: "" };
   var lockScreen = document.getElementById("lockScreen");
   var lockForm = document.getElementById("lockForm");
@@ -2310,11 +2314,18 @@
     e.preventDefault();
     var login = document.getElementById("lockLogin").value.trim();
     var pass = document.getElementById("lockPass").value.trim();
-    if (login === "Garden" && pass === "0038") {
+    var role = ROLES[login];
+    if (role && role.pass === pass) {
       siteAuth.login = login;
       siteAuth.pass = pass;
       lockScreen.style.display = "none";
       lockError.textContent = "";
+      var whSelect = document.getElementById("cartWarehouseSelect");
+      Array.prototype.slice.call(whSelect.options).forEach(function (opt) {
+        opt.hidden = role.warehouses.indexOf(opt.value) === -1;
+      });
+      var firstAllowed = Array.prototype.slice.call(whSelect.options).filter(function (opt) { return !opt.hidden; })[0];
+      if (firstAllowed) whSelect.value = firstAllowed.value;
     } else {
       lockError.textContent = "Login yoki parol noto'g'ri";
     }
