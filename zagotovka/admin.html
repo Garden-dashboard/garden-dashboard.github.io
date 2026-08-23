@@ -74,6 +74,10 @@
     border: 1.5px solid var(--border); background: var(--surface); color: var(--text); outline: none; box-shadow: var(--shadow);
   }
   #q:focus { border-color: var(--accent); }
+  .show-tagged-row {
+    display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 13px; color: var(--text-muted);
+  }
+  .show-tagged-row input { width: 16px; height: 16px; }
   .stats-row {
     display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; font-size: 11px;
   }
@@ -136,12 +140,16 @@
   <p class="eyebrow">Zagotovka &middot; Admin</p>
   <h1>Mahsulotlarni ombolarga belgilash</h1>
   <input id="q" type="text" placeholder="Mahsulot qidiring..." autocomplete="off" autocapitalize="off" spellcheck="false" />
+  <label class="show-tagged-row">
+    <input type="checkbox" id="showTaggedChk" />
+    Belgilanganlarni ham ko'rsat
+  </label>
   <div class="stats-row" id="statsRow"></div>
 </header>
 
 <main>
   <div class="idle" id="idleState">
-    <p>Mahsulot nomini yozing, so'ng qaysi <b>zagotovka omboriga</b> tegishli ekanini tugma bilan belgilang. O'zgarishlar pastdagi <b>"Saqlash"</b> tugmasi bosilgunча xotirada turadi.</p>
+    <p>Mahsulot nomini yozing, so'ng qaysi <b>zagotovka omboriga</b> tegishli ekanini tugma bilan belgilang. Belgilangan mahsulot ro'yxatdan darhol yashiriladi (kerak bo'lsa yuqoridagi "Belgilanganlarni ham ko'rsat"ni belgilab qayta ko'rish mumkin). O'zgarishlar pastdagi <b>"Saqlash"</b> tugmasi bosilgunча xotirada turadi.</p>
   </div>
   <ul id="results"></ul>
 </main>
@@ -1922,6 +1930,7 @@
   var resultsEl = document.getElementById("results");
   var idleEl = document.getElementById("idleState");
   var statsRow = document.getElementById("statsRow");
+  var showTaggedChk = document.getElementById("showTaggedChk");
 
   function renderStats() {
     var counts = {};
@@ -1945,7 +1954,11 @@
       return;
     }
     idleEl.style.display = "none";
-    var matches = RAW_NAMES.filter(function (n) { return n.toLowerCase().indexOf(q) !== -1; }).slice(0, 40);
+    var showTagged = showTaggedChk.checked;
+    var matches = RAW_NAMES
+      .filter(function (n) { return n.toLowerCase().indexOf(q) !== -1; })
+      .filter(function (n) { return showTagged || !map[n]; }) // belgilangan mahsulot -- Saqlash bosilishi bilan/bosilgach ro'yxatdan yashiriladi
+      .slice(0, 40);
 
     resultsEl.innerHTML = "";
     matches.forEach(function (name) {
@@ -1986,6 +1999,7 @@
   }
 
   qInput.addEventListener("input", function () { render(qInput.value); });
+  showTaggedChk.addEventListener("change", function () { render(qInput.value); });
 
   document.getElementById("saveBtn").addEventListener("click", function () {
     var btn = document.getElementById("saveBtn");
