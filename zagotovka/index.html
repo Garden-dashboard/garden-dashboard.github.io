@@ -533,12 +533,12 @@
     <button class="cart-clear" id="cartClearBtn" type="button">Hammasini tozalash</button>
   </div>
   <div class="cart-date-row">
-    <label class="cart-date-label" for="cartWarehouseSelect">🏢 Ombor</label>
-    <select class="cart-date-input" id="cartWarehouseSelect">
-      <option value="ГАРДЕН">Garden Mangal</option>
-      <option value="Олимп кафе">Olimp 1 (kafe) Mangal</option>
-      <option value="Упаковка">Olimp 1 (kafe) Upakovka</option>
-    </select>
+    <label class="cart-date-label" for="cartSourceSelect">📦 Manba</label>
+    <select class="cart-date-input" id="cartSourceSelect"></select>
+  </div>
+  <div class="cart-date-row">
+    <label class="cart-date-label" for="cartDestSelect">🏢 Qabul qiluvchi</label>
+    <select class="cart-date-input" id="cartDestSelect"></select>
   </div>
   <div class="cart-date-row">
     <label class="cart-date-label" for="cartDateInput">📅 Vaqti</label>
@@ -2301,15 +2301,78 @@
 (function () {
   "use strict";
 
-  // ---- Kirish (login/parol) -- har login faqat o'ziga tegishli omborlarni ko'radi ----
+  // ---- Manba omborlar va ularning haqiqiy yo'nalishlari (iikodagi so'nggi
+  // 30 kunlik OUTGOING_INVOICE tarixidan aniqlangan, 2026-08-19) ----
+  var SOURCE_LABELS = {
+    "БАРАК ЗАГАТОВКА": "Барак Заготовка",
+    "ГЛАВНИЙ ЗАГАТОВКА": "Главний Заготовка",
+    "ГУШТ ЗАГАТОВОКА": "Гушт Заготовка",
+    "КУХНЯ ЗАГАТОВКА": "Кухня Заготовка",
+    "МАНГАЛ ЗАГАТОВКА": "Мангал Заготовка",
+    "САЛАТ ЗАГАТОВКА": "Салат Заготовка",
+    "ХАМИР ЗАГАТОВКА": "Хамир Заготовка",
+  };
+  var ROUTES = {
+    "БАРАК ЗАГАТОВКА": ["OLIMP 1: Барак склад", "OLIMP 1: Кухня склад", "OLIMP GARDEN: Барак склад"],
+    "ГЛАВНИЙ ЗАГАТОВКА": [
+      "OLIMP 1: Балик склад", "OLIMP 1: Бар 1 склад", "OLIMP 1: Бар 2 склад", "OLIMP 1: Бар 3 склад",
+      "OLIMP 1: Барак склад", "OLIMP 1: Будка", "OLIMP 1: Кухня склад", "OLIMP 1: Мангал склад",
+      "OLIMP 1: Салат склад", "OLIMP 1: Сомса склад", "OLIMP 1: Спорт Зал", "OLIMP 1: Упаковка склад",
+      "OLIMP 1: Хоз товар Олимп", "OLIMP GARDEN: Балик склад", "OLIMP GARDEN: Бар 1 склад",
+      "OLIMP GARDEN: Бар 3 склад", "OLIMP GARDEN: Горячий склад", "OLIMP GARDEN: Коча бар склад",
+      "OLIMP GARDEN: Мангал склад", "OLIMP GARDEN: Нон чой склад", "OLIMP GARDEN: Салат склад",
+      "OLIMP GARDEN: Склад Olimp garden", "OLIMP GARDEN: Сомса склад",
+    ],
+    "ГУШТ ЗАГАТОВОКА": [
+      "OLIMP 1: Барак склад", "OLIMP 1: Будка", "OLIMP 1: Кухня склад", "OLIMP 1: Мангал склад",
+      "OLIMP 1: Сомса склад", "OLIMP GARDEN: Барак склад", "OLIMP GARDEN: Горячий склад",
+      "OLIMP GARDEN: Мангал склад", "OLIMP GARDEN: Салат склад", "OLIMP GARDEN: Сомса склад",
+    ],
+    "КУХНЯ ЗАГАТОВКА": [
+      "OLIMP 1: Бар 2 склад", "OLIMP 1: Кухня склад", "OLIMP 1: Мангал склад",
+      "OLIMP 1: Олимп склад (БОЗОР)", "OLIMP 1: Сомса склад", "OLIMP GARDEN: Горячий склад",
+      "OLIMP GARDEN: Мангал склад", "OLIMP GARDEN: Сомса склад", "OLIMP GARDEN: Хоз.товар склад",
+    ],
+    "МАНГАЛ ЗАГАТОВКА": [
+      "OLIMP 1: Кухня склад", "OLIMP 1: Мангал склад", "OLIMP 1: Упаковка склад",
+      "OLIMP GARDEN: Мангал склад", "OLIMP GARDEN: Сомса склад",
+    ],
+    "САЛАТ ЗАГАТОВКА": ["OLIMP 1: Салат склад", "OLIMP GARDEN: Горячий склад", "OLIMP GARDEN: Салат склад"],
+    "ХАМИР ЗАГАТОВКА": [
+      "OLIMP 1: Бар 1 склад", "OLIMP 1: Барак склад", "OLIMP 1: Кухня склад", "OLIMP 1: Сомса склад",
+      "OLIMP GARDEN: Барак склад", "OLIMP GARDEN: Горячий склад", "OLIMP GARDEN: Нон чой склад",
+    ],
+  };
+
+  // ---- Kirish (login/parol) -- har login faqat o'z tashkilotiga (OLIMP GARDEN
+  // yoki OLIMP 1) tegishli qabul qiluvchilarni ko'radi ----
   var ROLES = {
-    "Garden": { pass: "0038", warehouses: ["ГАРДЕН"] },
-    "Olimp": { pass: "0038", warehouses: ["Олимп кафе", "Упаковка"] },
+    "Garden": { pass: "0038", org: "OLIMP GARDEN" },
+    "Olimp": { pass: "0038", org: "OLIMP 1" },
   };
   var siteAuth = { login: "", pass: "" };
   var lockScreen = document.getElementById("lockScreen");
   var lockForm = document.getElementById("lockForm");
   var lockError = document.getElementById("lockError");
+  var cartSourceSelect = document.getElementById("cartSourceSelect");
+  var cartDestSelect = document.getElementById("cartDestSelect");
+
+  function populateDestOptions() {
+    var source = cartSourceSelect.value;
+    var org = ROLES[siteAuth.login] ? ROLES[siteAuth.login].org : "";
+    var allDests = ROUTES[source] || [];
+    var allowed = allDests.filter(function (d) { return d.indexOf(org + ":") === 0; });
+    cartDestSelect.innerHTML = "";
+    allowed.forEach(function (d) {
+      var opt = document.createElement("option");
+      opt.value = d;
+      opt.textContent = d.replace(org + ": ", "");
+      cartDestSelect.appendChild(opt);
+    });
+  }
+
+  cartSourceSelect.addEventListener("change", populateDestOptions);
+
   lockForm.addEventListener("submit", function (e) {
     e.preventDefault();
     var login = document.getElementById("lockLogin").value.trim();
@@ -2320,12 +2383,15 @@
       siteAuth.pass = pass;
       lockScreen.style.display = "none";
       lockError.textContent = "";
-      var whSelect = document.getElementById("cartWarehouseSelect");
-      Array.prototype.slice.call(whSelect.options).forEach(function (opt) {
-        opt.hidden = role.warehouses.indexOf(opt.value) === -1;
+
+      cartSourceSelect.innerHTML = "";
+      Object.keys(SOURCE_LABELS).forEach(function (src) {
+        var opt = document.createElement("option");
+        opt.value = src;
+        opt.textContent = SOURCE_LABELS[src];
+        cartSourceSelect.appendChild(opt);
       });
-      var firstAllowed = Array.prototype.slice.call(whSelect.options).filter(function (opt) { return !opt.hidden; })[0];
-      if (firstAllowed) whSelect.value = firstAllowed.value;
+      populateDestOptions();
     } else {
       lockError.textContent = "Login yoki parol noto'g'ri";
     }
@@ -2497,7 +2563,6 @@
   var cartEl = document.getElementById("cart");
   var cartListEl = document.getElementById("cartList");
   var cartTitleEl = document.getElementById("cartTitle");
-  var cartWarehouseSelect = document.getElementById("cartWarehouseSelect");
   var cartDateInput = document.getElementById("cartDateInput");
   var cartClearBtn = document.getElementById("cartClearBtn");
   var cartCopyBtn = document.getElementById("cartCopyBtn");
@@ -2538,9 +2603,9 @@
     var lines = cart.map(function (item) {
       return item.qty.trim() ? item.name + " - " + item.qty.trim() : item.name;
     });
-    var warehouse = cartWarehouseSelect.value;
+    var routeLabel = cartSourceSelect.value + " → " + cartDestSelect.value;
     var when = cartDateInput.value ? formatDisplayDate(cartDateInput.value) : "";
-    var headerLines = [warehouse];
+    var headerLines = [routeLabel];
     if (when) headerLines.push("📅 " + when);
     return headerLines.join("\n") + "\n" + lines.join("\n");
   }
@@ -2630,7 +2695,8 @@
       body: JSON.stringify({
         login: siteAuth.login,
         pass: siteAuth.pass,
-        warehouse: cartWarehouseSelect.value,
+        source: cartSourceSelect.value,
+        dest: cartDestSelect.value,
         when: cartDateInput.value ? formatDisplayDate(cartDateInput.value) : "",
         items: cart.map(function (it) { return { name: it.name, qty: it.qty }; }),
       }),
