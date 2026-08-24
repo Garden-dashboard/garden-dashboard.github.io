@@ -2336,9 +2336,14 @@
 
   // ---- Kirish (login/parol) -- har login faqat o'z tashkilotiga (OLIMP GARDEN
   // yoki OLIMP 1) tegishli qabul qiluvchilarni ko'radi ----
+  // Ba'zi loginlar (masalan aniq bir ombor xodimi) qo'shimcha "dest"ga ega --
+  // bunday login kirganda qabul qiluvchi tanlash ro'yxati chiqmaydi, avtomatik
+  // shu qiymatga o'rnatiladi (tanlov o'chirilgan holda ko'rsatiladi). Serverda
+  // ham majburan shu qiymat ishlatiladi (client tomon soxtalashtira olmaydi).
   var ROLES = {
     "Garden": { pass: "0038", org: "OLIMP GARDEN" },
     "Olimp": { pass: "0038", org: "OLIMP 1" },
+    "Sawa": { pass: "0038", org: "OLIMP GARDEN", dest: "OLIMP GARDEN: Горячий склад" },
   };
   var siteAuth = { login: "", pass: "" };
   var lockScreen = document.getElementById("lockScreen");
@@ -2348,7 +2353,21 @@
   var productSourceMap = {}; // GET /admin/map orqali yuklanadi -- faqat "❓" belgisi uchun
 
   function populateDestOptions() {
-    var org = ROLES[siteAuth.login] ? ROLES[siteAuth.login].org : "";
+    var role = ROLES[siteAuth.login];
+    var org = role ? role.org : "";
+
+    if (role && role.dest) {
+      // Login qabul qiluvchiga qattiq bog'langan -- tanlov emas, faqat ko'rsatish.
+      cartDestSelect.innerHTML = "";
+      var fixedOpt = document.createElement("option");
+      fixedOpt.value = role.dest;
+      fixedOpt.textContent = role.dest.replace(org + ": ", "");
+      cartDestSelect.appendChild(fixedOpt);
+      cartDestSelect.disabled = true;
+      return;
+    }
+
+    cartDestSelect.disabled = false;
     var allDests = {};
     Object.keys(ROUTES).forEach(function (src) {
       ROUTES[src].forEach(function (d) {
