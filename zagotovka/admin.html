@@ -69,6 +69,12 @@
   }
   .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent); margin: 0 0 4px; }
   h1 { margin: 0 0 14px; font-size: 20px; font-weight: 800; }
+  .tab-nav { display: flex; gap: 8px; margin-bottom: 14px; }
+  .tab-btn {
+    flex: 1; padding: 10px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--surface);
+    color: var(--text-muted); font-size: 13.5px; font-weight: 700; cursor: pointer;
+  }
+  .tab-btn.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
   #q {
     width: 100%; font-size: 16px; font-family: inherit; padding: 13px 16px; border-radius: var(--radius);
     border: 1.5px solid var(--border); background: var(--surface); color: var(--text); outline: none; box-shadow: var(--shadow);
@@ -117,6 +123,32 @@
     font-size: 14.5px; font-weight: 700; cursor: pointer;
   }
   .save-btn:disabled { opacity: 0.5; }
+
+  .role-form {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 14px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;
+  }
+  .role-form-row { display: flex; gap: 8px; }
+  .role-form input, .role-form select {
+    flex: 1; min-width: 0; font-size: 14px; font-family: inherit; padding: 10px 12px; border-radius: 9px;
+    border: 1.5px solid var(--border); background: var(--bg); color: var(--text);
+  }
+  .role-add-btn {
+    padding: 11px; border: none; border-radius: 9px; background: var(--accent-2); color: #fff;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+  ul#rolesList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  li.role-item {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 12px 14px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 10px;
+  }
+  .role-item-info { flex: 1; min-width: 0; }
+  .role-item-login { font-size: 14.5px; font-weight: 700; }
+  .role-item-detail { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .role-del-btn {
+    padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--surface);
+    color: var(--accent); font-size: 12px; font-weight: 700; cursor: pointer; flex-shrink: 0;
+  }
 </style>
 </head>
 <body>
@@ -138,25 +170,56 @@
 
 <header>
   <p class="eyebrow">Zagotovka &middot; Admin</p>
-  <h1>Mahsulotlarni ombolarga belgilash</h1>
-  <input id="q" type="text" placeholder="Mahsulot qidiring..." autocomplete="off" autocapitalize="off" spellcheck="false" />
-  <label class="show-tagged-row">
-    <input type="checkbox" id="showTaggedChk" />
-    Belgilanganlarni ham ko'rsat
-  </label>
-  <div class="stats-row" id="statsRow"></div>
+  <h1 id="pageTitle">Mahsulotlarni ombolarga belgilash</h1>
+  <div class="tab-nav">
+    <button type="button" class="tab-btn active" id="tabProductsBtn">📦 Mahsulotlar</button>
+    <button type="button" class="tab-btn" id="tabRolesBtn">👤 Loginlar</button>
+  </div>
+  <div id="productsHeader">
+    <input id="q" type="text" placeholder="Mahsulot qidiring..." autocomplete="off" autocapitalize="off" spellcheck="false" />
+    <label class="show-tagged-row">
+      <input type="checkbox" id="showTaggedChk" />
+      Belgilanganlarni ham ko'rsat
+    </label>
+    <div class="stats-row" id="statsRow"></div>
+  </div>
 </header>
 
 <main>
-  <div class="idle" id="idleState">
-    <p>Mahsulot nomini yozing, so'ng qaysi <b>zagotovka omboriga</b> tegishli ekanini tugma bilan belgilang. Belgilangan mahsulot ro'yxatdan darhol yashiriladi (kerak bo'lsa yuqoridagi "Belgilanganlarni ham ko'rsat"ni belgilab qayta ko'rish mumkin). O'zgarishlar pastdagi <b>"Saqlash"</b> tugmasi bosilgunча xotirada turadi.</p>
+  <div id="productsPanel">
+    <div class="idle" id="idleState">
+      <p>Mahsulot nomini yozing, so'ng qaysi <b>zagotovka omboriga</b> tegishli ekanini tugma bilan belgilang. Belgilangan mahsulot ro'yxatdan darhol yashiriladi (kerak bo'lsa yuqoridagi "Belgilanganlarni ham ko'rsat"ni belgilab qayta ko'rish mumkin). O'zgarishlar pastdagi <b>"Saqlash"</b> tugmasi bosilgunча xotirada turadi.</p>
+    </div>
+    <ul id="results"></ul>
   </div>
-  <ul id="results"></ul>
+
+  <div id="rolesPanel" style="display:none;">
+    <div class="idle" style="padding:6px 8px 16px;">
+      <p>Aniq bir ombor uchun login qo'shing (masalan bitta xodim doim bitta qabul qiluvchiga zayavka yozadi bo'lsa). Shu login bilan kirilganda qabul qiluvchi tanlash oynasi chiqmaydi, avtomatik shu ombor tanlangan bo'ladi. "Qo'lda tanlasin" tanlansa -- oddiy Garden/Olimp kabi, o'zi tanlaydi.</p>
+    </div>
+    <div class="role-form">
+      <div class="role-form-row">
+        <input id="roleLoginInput" type="text" placeholder="Login (masalan: Aziz)" autocomplete="off" autocapitalize="off" spellcheck="false" />
+        <input id="rolePassInput" type="text" placeholder="Parol" autocomplete="off" />
+      </div>
+      <div class="role-form-row">
+        <select id="roleOrgSelect"></select>
+        <select id="roleDestSelect"></select>
+      </div>
+      <button type="button" class="role-add-btn" id="roleAddBtn">+ Login qo'shish</button>
+    </div>
+    <ul id="rolesList"></ul>
+  </div>
 </main>
 
-<div class="save-bar">
+<div class="save-bar" id="productsSaveBar">
   <span class="save-status" id="saveStatus">O'zgarishsiz</span>
   <button class="save-btn" id="saveBtn">💾 Saqlash</button>
+</div>
+
+<div class="save-bar" id="rolesSaveBar" style="display:none;">
+  <span class="save-status" id="rolesSaveStatus">O'zgarishsiz</span>
+  <button class="save-btn" id="rolesSaveBtn">💾 Saqlash</button>
 </div>
 
 <script id="catalog-data" type="application/json">[
@@ -1902,6 +1965,11 @@
   var RAW_NAMES = JSON.parse(document.getElementById("catalog-data").textContent);
   var map = {}; // name -> source (dirty, in-memory)
   var dirty = false;
+  var roles = {}; // login -> {pass, org, dest?} (dirty, in-memory)
+  var rolesDirty = false;
+  var baseLogins = [];
+  var orgs = [];
+  var dests = [];
 
   // ---- Kirish ----
   var lockScreen = document.getElementById("lockScreen");
@@ -1913,16 +1981,60 @@
     e.preventDefault();
     var pass = document.getElementById("lockPass").value.trim();
     adminPass = pass;
-    fetch(API_BASE + "/admin/map")
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        if (data.ok) {
-          map = data.map || {};
+    Promise.all([
+      fetch(API_BASE + "/admin/map").then(function (r) { return r.json(); }),
+      fetch(API_BASE + "/admin/roles").then(function (r) { return r.json(); }),
+    ])
+      .then(function (results) {
+        var mapData = results[0];
+        var rolesData = results[1];
+        if (mapData.ok) {
+          map = mapData.map || {};
           lockScreen.style.display = "none";
           renderStats();
         }
+        if (rolesData.ok) {
+          roles = rolesData.roles || {};
+          baseLogins = rolesData.baseLogins || [];
+          orgs = rolesData.orgs || [];
+          dests = rolesData.dests || [];
+          initRoleForm();
+          renderRoles();
+        }
       })
       .catch(function () { lockError.textContent = "Ulanishda xato"; });
+  });
+
+  // ---- Bo'limlar (tab) ----
+  var tabProductsBtn = document.getElementById("tabProductsBtn");
+  var tabRolesBtn = document.getElementById("tabRolesBtn");
+  var productsHeader = document.getElementById("productsHeader");
+  var productsPanel = document.getElementById("productsPanel");
+  var rolesPanel = document.getElementById("rolesPanel");
+  var productsSaveBar = document.getElementById("productsSaveBar");
+  var rolesSaveBar = document.getElementById("rolesSaveBar");
+  var pageTitle = document.getElementById("pageTitle");
+
+  tabProductsBtn.addEventListener("click", function () {
+    tabProductsBtn.className = "tab-btn active";
+    tabRolesBtn.className = "tab-btn";
+    productsHeader.style.display = "block";
+    productsPanel.style.display = "block";
+    rolesPanel.style.display = "none";
+    productsSaveBar.style.display = "flex";
+    rolesSaveBar.style.display = "none";
+    pageTitle.textContent = "Mahsulotlarni ombolarga belgilash";
+  });
+
+  tabRolesBtn.addEventListener("click", function () {
+    tabRolesBtn.className = "tab-btn active";
+    tabProductsBtn.className = "tab-btn";
+    productsHeader.style.display = "none";
+    productsPanel.style.display = "none";
+    rolesPanel.style.display = "block";
+    productsSaveBar.style.display = "none";
+    rolesSaveBar.style.display = "flex";
+    pageTitle.textContent = "Loginlar";
   });
 
   // ---- Qidiruv (sodda substring, katalog kichikroq bo'lgani uchun yetarli) ----
@@ -2024,8 +2136,123 @@
       .finally(function () { btn.disabled = false; });
   });
 
+  // ---- Loginlar bo'limi ----
+  var roleLoginInput = document.getElementById("roleLoginInput");
+  var rolePassInput = document.getElementById("rolePassInput");
+  var roleOrgSelect = document.getElementById("roleOrgSelect");
+  var roleDestSelect = document.getElementById("roleDestSelect");
+  var rolesList = document.getElementById("rolesList");
+
+  function destsForOrg(org) {
+    return dests.filter(function (d) { return d.indexOf(org + ": ") === 0; });
+  }
+
+  function populateRoleDestSelect() {
+    var org = roleOrgSelect.value;
+    roleDestSelect.innerHTML = "";
+    var manualOpt = document.createElement("option");
+    manualOpt.value = "";
+    manualOpt.textContent = "— Qo'lda tanlasin —";
+    roleDestSelect.appendChild(manualOpt);
+    destsForOrg(org).sort().forEach(function (d) {
+      var opt = document.createElement("option");
+      opt.value = d;
+      opt.textContent = d.replace(org + ": ", "");
+      roleDestSelect.appendChild(opt);
+    });
+  }
+
+  function initRoleForm() {
+    roleOrgSelect.innerHTML = "";
+    orgs.forEach(function (o) {
+      var opt = document.createElement("option");
+      opt.value = o;
+      opt.textContent = o;
+      roleOrgSelect.appendChild(opt);
+    });
+    populateRoleDestSelect();
+  }
+
+  roleOrgSelect.addEventListener("change", populateRoleDestSelect);
+
+  function renderRoles() {
+    rolesList.innerHTML = "";
+    Object.keys(roles).sort().forEach(function (login) {
+      var r = roles[login];
+      var li = document.createElement("li");
+      li.className = "role-item";
+      var detail = r.org + (r.dest ? " · avtomatik: " + r.dest.replace(r.org + ": ", "") : " · qo'lda tanlaydi");
+      li.innerHTML =
+        '<div class="role-item-info">' +
+        '<div class="role-item-login">' + login.replace(/&/g, "&amp;").replace(/</g, "&lt;") + '</div>' +
+        '<div class="role-item-detail">' + detail.replace(/&/g, "&amp;").replace(/</g, "&lt;") + ' · parol: ' + r.pass + '</div>' +
+        '</div>' +
+        '<button type="button" class="role-del-btn" data-login="' + login.replace(/"/g, "&quot;") + '">🗑 O\'chirish</button>';
+      rolesList.appendChild(li);
+    });
+
+    Array.prototype.forEach.call(rolesList.querySelectorAll(".role-del-btn"), function (btn) {
+      btn.addEventListener("click", function () {
+        var login = btn.getAttribute("data-login");
+        delete roles[login];
+        rolesDirty = true;
+        document.getElementById("rolesSaveStatus").textContent = "Saqlanmagan o'zgarishlar bor";
+        renderRoles();
+      });
+    });
+  }
+
+  document.getElementById("roleAddBtn").addEventListener("click", function () {
+    var login = roleLoginInput.value.trim();
+    var pass = rolePassInput.value.trim();
+    var org = roleOrgSelect.value;
+    var dest = roleDestSelect.value;
+    var status = document.getElementById("rolesSaveStatus");
+
+    if (!login || !pass) {
+      status.textContent = "❌ Login va parol kiriting";
+      return;
+    }
+    if (baseLogins.indexOf(login) !== -1) {
+      status.textContent = "❌ '" + login + "' asosiy login, band qilib bo'lmaydi";
+      return;
+    }
+
+    var role = { pass: pass, org: org };
+    if (dest) role.dest = dest;
+    roles[login] = role;
+    rolesDirty = true;
+    status.textContent = "Saqlanmagan o'zgarishlar bor";
+    roleLoginInput.value = "";
+    rolePassInput.value = "";
+    renderRoles();
+  });
+
+  document.getElementById("rolesSaveBtn").addEventListener("click", function () {
+    var btn = document.getElementById("rolesSaveBtn");
+    var status = document.getElementById("rolesSaveStatus");
+    btn.disabled = true;
+    status.textContent = "Saqlanmoqda...";
+    fetch(API_BASE + "/admin/roles", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: adminPass, roles: roles }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.ok) {
+          status.textContent = "✅ Saqlandi (" + data.count + " ta login)";
+          rolesDirty = false;
+        } else {
+          status.textContent = "❌ Xato: " + (data.error || "");
+        }
+      })
+      .catch(function () { status.textContent = "❌ Ulanishda xato"; })
+      .finally(function () { btn.disabled = false; });
+  });
+
   window.addEventListener("beforeunload", function (e) {
-    if (dirty) { e.preventDefault(); e.returnValue = ""; }
+    if (dirty || rolesDirty) { e.preventDefault(); e.returnValue = ""; }
   });
 })();
 </script>
