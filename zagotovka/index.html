@@ -508,7 +508,7 @@
         <label for="lockPass">Parol</label>
         <input type="password" id="lockPass" autocomplete="current-password" inputmode="numeric" />
       </div>
-      <button type="submit" class="lock-btn">Kirish</button>
+      <button type="submit" class="lock-btn" id="lockSubmitBtn">Kirish</button>
       <p class="lock-error" id="lockError"></p>
     </form>
   </div>
@@ -2340,18 +2340,37 @@
   // bunday login kirganda qabul qiluvchi tanlash ro'yxati chiqmaydi, avtomatik
   // shu qiymatga o'rnatiladi (tanlov o'chirilgan holda ko'rsatiladi). Serverda
   // ham majburan shu qiymat ishlatiladi (client tomon soxtalashtira olmaydi).
+  // Asosiy 2 ta rol shu yerda qattiq -- qolgan (aniq bir omborga bog'langan)
+  // loginlar endi admin.html "Loginlar" bo'limi orqali qo'shiladi/o'chiriladi,
+  // sahifa ochilganda serverdan (GET /admin/roles) yuklanib shu ob'ektga qo'shiladi.
+  var SEND_ENDPOINT = atob("aHR0cHM6Ly96YWdvdG92a2EtemF5YXZrYS1zZW5kLm9saW1wemFnb3RvdmthLndvcmtlcnMuZGV2");
   var ROLES = {
     "Garden": { pass: "0038", org: "OLIMP GARDEN" },
     "Olimp": { pass: "0038", org: "OLIMP 1" },
-    "Sawa": { pass: "0038", org: "OLIMP GARDEN", dest: "OLIMP GARDEN: Горячий склад" },
-    "Suxrob": { pass: "0038", org: "OLIMP GARDEN", dest: "OLIMP GARDEN: Горячий склад" },
   };
   var siteAuth = { login: "", pass: "" };
   var lockScreen = document.getElementById("lockScreen");
   var lockForm = document.getElementById("lockForm");
   var lockError = document.getElementById("lockError");
+  var lockSubmitBtn = document.getElementById("lockSubmitBtn");
   var cartDestSelect = document.getElementById("cartDestSelect");
   var productSourceMap = {}; // GET /admin/map orqali yuklanadi -- faqat "❓" belgisi uchun
+
+  lockSubmitBtn.disabled = true;
+  lockError.textContent = "Yuklanmoqda...";
+  fetch(SEND_ENDPOINT + "/admin/roles")
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (data.ok && data.roles) {
+        Object.keys(data.roles).forEach(function (login) { ROLES[login] = data.roles[login]; });
+      }
+      lockSubmitBtn.disabled = false;
+      lockError.textContent = "";
+    })
+    .catch(function () {
+      lockSubmitBtn.disabled = false;
+      lockError.textContent = "";
+    });
 
   function populateDestOptions() {
     var role = ROLES[siteAuth.login];
@@ -2684,8 +2703,6 @@
     if (cart.length === 0) return;
     copyText(buildZayavkaText(), "Ro'yxat nusxalandi (" + cart.length + " ta)");
   });
-
-  var SEND_ENDPOINT = atob("aHR0cHM6Ly96YWdvdG92a2EtemF5YXZrYS1zZW5kLm9saW1wemFnb3RvdmthLndvcmtlcnMuZGV2");
 
   cartSendBtn.addEventListener("click", function () {
     if (cart.length === 0) return;
