@@ -1984,6 +1984,10 @@
   lockForm.addEventListener("submit", function (e) {
     e.preventDefault();
     var pass = document.getElementById("lockPass").value.trim();
+    if (pass !== "olimp2026") {
+      lockError.textContent = "Parol noto'g'ri";
+      return;
+    }
     adminPass = pass;
     Promise.all([
       fetch(API_BASE + "/admin/map").then(function (r) { return r.json(); }),
