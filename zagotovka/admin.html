@@ -2213,11 +2213,37 @@
       btn.addEventListener("click", function () {
         var login = btn.getAttribute("data-login");
         delete roles[login];
-        rolesDirty = true;
-        document.getElementById("rolesSaveStatus").textContent = "Saqlanmagan o'zgarishlar bor";
         renderRoles();
+        saveRoles(); // o'chirish ham darhol saqlanadi -- alohida "Saqlash" bosish shart emas
       });
     });
+  }
+
+  // Loginlar endi HAR bir qo'shish/o'chirishda DARHOL saqlanadi -- avvalgi
+  // "qo'sh, keyin alohida Saqlash bos" ikki bosqichli jarayon chalkashlik
+  // keltirib chiqargani uchun (foydalanuvchi ikkinchi qadamni unutib qoldirar
+  // edi) 2026-08-26'da olib tashlandi.
+  function saveRoles() {
+    var status = document.getElementById("rolesSaveStatus");
+    var btn = document.getElementById("rolesSaveBtn");
+    btn.disabled = true;
+    status.textContent = "Saqlanmoqda...";
+    return fetch(API_BASE + "/admin/roles", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: adminPass, roles: roles }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.ok) {
+          status.textContent = "✅ Saqlandi (" + data.count + " ta login)";
+          rolesDirty = false;
+        } else {
+          status.textContent = "❌ Xato: " + (data.error || "");
+        }
+      })
+      .catch(function () { status.textContent = "❌ Ulanishda xato"; })
+      .finally(function () { btn.disabled = false; });
   }
 
   document.getElementById("roleAddBtn").addEventListener("click", function () {
@@ -2239,35 +2265,13 @@
     var role = { pass: pass, org: org };
     if (dest) role.dest = dest;
     roles[login] = role;
-    rolesDirty = true;
-    status.textContent = "Saqlanmagan o'zgarishlar bor";
     roleLoginInput.value = "";
     rolePassInput.value = "";
     renderRoles();
+    saveRoles(); // darhol saqlanadi
   });
 
-  document.getElementById("rolesSaveBtn").addEventListener("click", function () {
-    var btn = document.getElementById("rolesSaveBtn");
-    var status = document.getElementById("rolesSaveStatus");
-    btn.disabled = true;
-    status.textContent = "Saqlanmoqda...";
-    fetch(API_BASE + "/admin/roles", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password: adminPass, roles: roles }),
-    })
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        if (data.ok) {
-          status.textContent = "✅ Saqlandi (" + data.count + " ta login)";
-          rolesDirty = false;
-        } else {
-          status.textContent = "❌ Xato: " + (data.error || "");
-        }
-      })
-      .catch(function () { status.textContent = "❌ Ulanishda xato"; })
-      .finally(function () { btn.disabled = false; });
-  });
+  document.getElementById("rolesSaveBtn").addEventListener("click", saveRoles);
 
   window.addEventListener("beforeunload", function (e) {
     if (dirty || rolesDirty) { e.preventDefault(); e.returnValue = ""; }
