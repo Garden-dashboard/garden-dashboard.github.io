@@ -94,6 +94,7 @@
 
   main { flex: 1; padding: 12px 16px 100px; max-width: 640px; width: 100%; margin: 0 auto; }
   .idle { padding: 30px 8px 8px; color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+  .idle-note { padding: 0 8px 8px; color: var(--text-muted); font-size: 12.5px; font-weight: 700; }
 
   ul#results { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
   li.result {
@@ -188,8 +189,9 @@
 <main>
   <div id="productsPanel">
     <div class="idle" id="idleState">
-      <p>Mahsulot nomini yozing, so'ng qaysi <b>zagotovka omboriga</b> tegishli ekanini tugma bilan belgilang. Belgilangan mahsulot ro'yxatdan darhol yashiriladi (kerak bo'lsa yuqoridagi "Belgilanganlarni ham ko'rsat"ni belgilab qayta ko'rish mumkin). O'zgarishlar pastdagi <b>"Saqlash"</b> tugmasi bosilgunча xotirada turadi.</p>
+      <p>Barcha накладnoy tarixidagi mahsulotlar belgilangan ekan — tabriklaymiz! Boshqa mahsulot qidirish uchun yuqoriga yozing.</p>
     </div>
+    <p class="idle-note" id="idleNote"></p>
     <ul id="results"></ul>
   </div>
 
@@ -1951,6 +1953,7 @@
     "штампавой роза",
     "штрих"
 ]</script>
+<script id="priority-data" type="application/json">["Сув 1,5л","Однаразовой идиш кичик","Влажний салфетка 1шт","Сув 1л (сайхун)","Шакар кг","Лимон сироп","Карейс туз","Кора бурч (майда)","Пахта йоги","Арк Теа 1.25л","Арк-Теа 0.5л","Кола 0,5","Кола 1 л","Копкокли идиш катта","Спрайт 1л","Сув 0,5л","Сув 1л","Фанта 1л","Чококрем","Исмалок п/ф","Фалга","Кенза (переправа)","Кунжут","Адреналин 0,45","Алпен Голд","Боржоми","Вико 1л","Кола 1,5 л","Мохито 0,45","Пепси 0,5л","Пепси 1л","Плиточный (КиЧиК)","Плиточный (катта)","Салют шт","Сникерс катта шт","Сникерс кичик шт","Сок 1 л","Спрайт 0,5л","Тошкент Суви 0,5л","Фанта 0,5л","Флеш 0,45","Чорток 0,5","Кофе лавазза кг(зерновой)","Приправа шашлик","Чили сладки соус (ЛИТР)","Шампинион банка","Пакет 3кг","Зира","Уксус яблочний","Фергамент когоз","Футболка","Орбит","Свежи Аччи бурч","Урганч УН","Боунтий кичик","Кора чой кг","Кук чой кг","Пепси (баночный) 0.45","Пепси 1,5л","Сок детски","Спрайт 1,5л","Фанта 1,5л","Ред-булл 0.25","Мохито сироп","Кизил бурч (майдаланган)","Паприка","Соус идиш 40гр","Макка","Гарох 1л","Крахмал","Кукуруз (макка) 1л","Разрихител","Соя соус (литр)","Кола баночный 0,25","Анти жир","Близна","Бумажный салфетка","Вилка  одноразовая","Гупка","Гурвак шт","Жидки мило 5л","Зубочистка","Ковун (шт)","Кошик одноразовая","Муср пакет","Муср пакет катта","Одноразовая Перчатка","Ок куйлак","Олимп Пакет 3 кг","Освижитель","Пакет рулон","Пакет рулон (кичик)","Перчатка кора","Пол трапка","Принтер чек когоз (шт)","Резинка Перчатка сори","Салфетка","Сарик катта стреч","Сим чутка (шт)","Сода","Солихан Салфетка","Спрей 500 мл","Стреч катта","Тала гел","Туалетный бумага","Умонник Салфетка","Фартук","Чит перечатка","Гушт 5-сорт","Местний Товук (шт)","Преправа унверсал","Чакида мазали","Чечевица (кг)","Крылиишки маринад (кг) п\\ф","Гужа п/ф","Салёний Помидор (кичик) п/ф","Шакар 1шт (пакетли)","кола бутылка 0,250","фанта бутылка 0,250","Фрит масло","Докторская Колбаса","Зайчик молоко","Уксус 100%","Автомат сода","Кепка","Контейнер кичик 500 гр","Одноразовый Стакан","Салфетнитса","Сапак","держатель для стакана","контейнер 0.15","7 Уп","Кола баночний 0,45","Липтон чай 1л","Маунтинт дюв 1л","Миллий кола 0,5л","Миринда 1,5л","Сут лактел","Миллий лимоо 1,5л шт","Зелен","Нуш пийоз","Салат лист","Гугурт (тавар) шт","Дери","Етикетка стикер","кофе стакан","раквина сетка","Жужа (200гр) шт","Палов Заказной 1 кг п/ф","Палов оддий п/ф","Урдак сели п\\ф","Бедана Катта хом","Гиждувон маринад (кг) п\\ф","Думба","Урдак шашлик мариновка п\\ф","Шашлик Полка шт"]</script>
 <script>
 (function () {
   "use strict";
@@ -1963,6 +1966,7 @@
   var API_BASE = atob("aHR0cHM6Ly96YWdvdG92a2EtemF5YXZrYS1zZW5kLm9saW1wemFnb3RvdmthLndvcmtlcnMuZGV2");
 
   var RAW_NAMES = JSON.parse(document.getElementById("catalog-data").textContent);
+  var PRIORITY_LIST = JSON.parse(document.getElementById("priority-data").textContent); // накладnoy tarixida ko'ringan, ehtimol kerakli mahsulotlar
   var map = {}; // name -> source (dirty, in-memory)
   var dirty = false;
   var roles = {}; // login -> {pass, org, dest?} (dirty, in-memory)
@@ -1992,6 +1996,7 @@
           map = mapData.map || {};
           lockScreen.style.display = "none";
           renderStats();
+          render(qInput.value);
         }
         if (rolesData.ok) {
           roles = rolesData.roles || {};
@@ -2041,6 +2046,7 @@
   var qInput = document.getElementById("q");
   var resultsEl = document.getElementById("results");
   var idleEl = document.getElementById("idleState");
+  var idleNote = document.getElementById("idleNote");
   var statsRow = document.getElementById("statsRow");
   var showTaggedChk = document.getElementById("showTaggedChk");
 
@@ -2060,17 +2066,25 @@
 
   function render(query) {
     var q = query.trim().toLowerCase();
-    if (q.length < 2) {
-      idleEl.style.display = "block";
-      resultsEl.innerHTML = "";
-      return;
-    }
-    idleEl.style.display = "none";
     var showTagged = showTaggedChk.checked;
-    var matches = RAW_NAMES
-      .filter(function (n) { return n.toLowerCase().indexOf(q) !== -1; })
-      .filter(function (n) { return showTagged || !map[n]; }) // belgilangan mahsulot -- Saqlash bosilishi bilan/bosilgach ro'yxatdan yashiriladi
-      .slice(0, 40);
+    var matches;
+
+    if (q.length < 2) {
+      // Qidiruv bo'sh bo'lsa -- накладnoy tarixida ko'ringan, hali belgilanmagan
+      // ("ustuvor") mahsulotlarni ko'rsatamiz, tasodifiy 1560+ butun katalog o'rniga.
+      matches = PRIORITY_LIST.filter(function (n) { return showTagged || !map[n]; });
+      idleEl.style.display = matches.length ? "none" : "block";
+      idleNote.textContent = matches.length
+        ? "Ustuvor ro'yxat (накладnoy tarixida ko'ringan, " + matches.length + " ta belgilanmagan):"
+        : "";
+    } else {
+      idleEl.style.display = "none";
+      idleNote.textContent = "";
+      matches = RAW_NAMES
+        .filter(function (n) { return n.toLowerCase().indexOf(q) !== -1; })
+        .filter(function (n) { return showTagged || !map[n]; }) // belgilangan mahsulot -- Saqlash bosilishi bilan/bosilgach ro'yxatdan yashiriladi
+        .slice(0, 40);
+    }
 
     resultsEl.innerHTML = "";
     matches.forEach(function (name) {
