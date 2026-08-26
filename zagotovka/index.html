@@ -207,6 +207,29 @@
   }
   .cart-date-input:focus { outline: none; border-color: var(--accent); }
 
+  .date-toggle {
+    flex: 1;
+    display: flex;
+    gap: 6px;
+  }
+  .date-toggle-btn {
+    flex: 1;
+    font-size: 13.5px;
+    font-family: inherit;
+    font-weight: 600;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .date-toggle-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+
   ul#cartList {
     list-style: none;
     margin: 0 0 10px;
@@ -537,8 +560,11 @@
     <select class="cart-date-input" id="cartDestSelect"></select>
   </div>
   <div class="cart-date-row">
-    <label class="cart-date-label" for="cartDateInput">📅 Vaqti</label>
-    <input type="datetime-local" class="cart-date-input" id="cartDateInput" autocomplete="off" />
+    <label class="cart-date-label">📅 Sana</label>
+    <div class="date-toggle" id="dateToggle">
+      <button type="button" class="date-toggle-btn active" data-day="0">Bugun</button>
+      <button type="button" class="date-toggle-btn" data-day="1">Ertaga</button>
+    </div>
   </div>
   <ul id="cartList"></ul>
   <div class="cart-actions">
@@ -861,7 +887,8 @@
   var cartEl = document.getElementById("cart");
   var cartListEl = document.getElementById("cartList");
   var cartTitleEl = document.getElementById("cartTitle");
-  var cartDateInput = document.getElementById("cartDateInput");
+  var dateToggle = document.getElementById("dateToggle");
+  var selectedDayOffset = 0; // 0 = Bugun, 1 = Ertaga
   var cartClearBtn = document.getElementById("cartClearBtn");
   var cartCopyBtn = document.getElementById("cartCopyBtn");
   var cartSendBtn = document.getElementById("cartSendBtn");
@@ -882,27 +909,29 @@
     return map;
   }
 
-  function nowTashkentLocalValue() {
-    // <input type="datetime-local"> "YYYY-MM-DDTHH:mm" formatini talab qiladi
-    var p = tashkentParts(new Date());
-    return p.year + "-" + p.month + "-" + p.day + "T" + p.hour + ":" + p.minute;
+  function selectedDateDisplay() {
+    // "Bugun"/"Ertaga" tugmasiga qarab -- kalendar/vaqt kiritish o'rniga
+    // (2026-08-26, foydalanuvchi so'rovi bilan soddalashtirildi).
+    var d = new Date(Date.now() + selectedDayOffset * 24 * 60 * 60 * 1000);
+    var p = tashkentParts(d);
+    return p.day + "." + p.month + "." + p.year;
   }
 
-  cartDateInput.value = nowTashkentLocalValue(); // boshlang'ich taklif -- kalendardan o'zgartirsa bo'ladi
-
-  function formatDisplayDate(localValue) {
-    // "2026-08-18T18:30" -> "18.08.2026 18:30"
-    var m = localValue.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
-    if (!m) return localValue;
-    return m[3] + "." + m[2] + "." + m[1] + " " + m[4] + ":" + m[5];
-  }
+  dateToggle.addEventListener("click", function (e) {
+    var btn = e.target.closest(".date-toggle-btn");
+    if (!btn) return;
+    selectedDayOffset = parseInt(btn.getAttribute("data-day"), 10);
+    Array.prototype.forEach.call(dateToggle.querySelectorAll(".date-toggle-btn"), function (b) {
+      b.classList.toggle("active", b === btn);
+    });
+  });
 
   function buildZayavkaText() {
     var lines = cart.map(function (item) {
       var flag = productSourceMap[item.name] ? "" : " ❓";
       return (item.qty.trim() ? item.name + " - " + item.qty.trim() : item.name) + flag;
     });
-    var when = cartDateInput.value ? formatDisplayDate(cartDateInput.value) : "";
+    var when = selectedDateDisplay();
     var headerLines = [cartDestSelect.value];
     if (when) headerLines.push("📅 " + when);
     return headerLines.join("\n") + "\n" + lines.join("\n");
@@ -992,7 +1021,7 @@
         login: siteAuth.login,
         pass: siteAuth.pass,
         dest: cartDestSelect.value,
-        when: cartDateInput.value ? formatDisplayDate(cartDateInput.value) : "",
+        when: selectedDateDisplay(),
         items: cart.map(function (it) { return { name: it.name, qty: it.qty }; }),
       }),
     })
