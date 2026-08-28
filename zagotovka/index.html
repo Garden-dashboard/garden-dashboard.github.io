@@ -1007,6 +1007,14 @@
 
   cartSendBtn.addEventListener("click", function () {
     if (cart.length === 0) return;
+
+    // Oshpazlar "Bugun"/"Ertaga" tugmasini bosishni unutib qo'yishmasin deb
+    // (2026-08-27, foydalanuvchi so'rovi bilan) -- yuborishdan oldin oxirgi
+    // marta aniq ko'rsatib tasdiqlatiladi.
+    var dayLabel = selectedDayOffset === 0 ? "BUGUN" : "ERTAGA";
+    var confirmed = window.confirm("🗓 " + dayLabel + " (" + selectedDateDisplay() + ") uchun yuborilmoqda.\n\nTo'g'rimi?");
+    if (!confirmed) return;
+
     // To'g'ridan-to'g'ri, Telegram ilovasini ochmasdan yuboradi -- kichik
     // xavfsiz vositachi (Cloudflare Worker) orqali, bot TOKEN faqat o'sha
     // vositachida yashirin saqlanadi, bu sahifada hech qachon ko'rinmaydi.
