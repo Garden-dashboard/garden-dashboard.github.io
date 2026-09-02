@@ -2,7 +2,7 @@
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zayavka Qidiruv</title>
 <style>
   :root {
@@ -731,6 +731,7 @@
       siteAuth.pass = pass;
       lockScreen.style.display = "none";
       lockError.textContent = "";
+      applyDefaultDayOffset();
       populateDestOptions();
       prefillChecklist(cartDestSelect.value);
       fetch(SEND_ENDPOINT + "/admin/map")
@@ -952,6 +953,18 @@
       b.classList.toggle("active", b === btn);
     });
   });
+
+  function applyDefaultDayOffset() {
+    // 20:30 (Toshkent) dan keyin kirilsa, standart tanlov "Ertaga" bo'lsin --
+    // shu vaqtdan keyin yozilgan zayavka odatda ertangi kun uchun bo'ladi
+    // (2026-09-02, foydalanuvchi so'rovi bilan).
+    var p = tashkentParts(new Date());
+    var afterCutoff = parseInt(p.hour, 10) * 60 + parseInt(p.minute, 10) >= 20 * 60 + 30;
+    selectedDayOffset = afterCutoff ? 1 : 0;
+    Array.prototype.forEach.call(dateToggle.querySelectorAll(".date-toggle-btn"), function (b) {
+      b.classList.toggle("active", parseInt(b.getAttribute("data-day"), 10) === selectedDayOffset);
+    });
+  }
 
   function filledCart() {
     // Checklist orqali oldindan to'ldirilgan, lekin soni yozilmagan bandlar
