@@ -717,6 +717,7 @@
       cart.push({ name: it.name, qty: "", fromChecklist: true });
     });
     renderCart();
+    updateCountLabel(); // Горячий tanlansa qidiruv ro'yxati ham cheklanadi -- sonini yangilaymiz
   }
 
   cartDestSelect.addEventListener("change", function () { prefillChecklist(cartDestSelect.value); });
@@ -777,9 +778,29 @@
     return map;
   }
 
-  var PRODUCT_INDEX = buildIndex(RAW_NAMES);
-  var TOKEN_INDEX = buildTokenIndex(PRODUCT_INDEX);
-  document.getElementById("countLabel").textContent = RAW_NAMES.length + " mahsulot";
+  var GLOBAL_INDEX = buildIndex(RAW_NAMES);
+  var GLOBAL_TOKEN_INDEX = buildTokenIndex(GLOBAL_INDEX);
+
+  // 2026-09-04: foydalanuvchi so'rovi bilan -- Горячий склад uchun qidiruv
+  // ham xuddi checklist kabi FAQAT shu omborga tegishli mahsulotlar bilan
+  // cheklanadi (boshqa destinatsiyalar uchun qidiruv hozirgidek global
+  // qoladi). "avvalgidek" -- Горячий'ning o'ziga xos, kichik ro'yxati.
+  var GORACHIY_DEST = "OLIMP GARDEN: Горячий склад";
+  var GORACHIY_NAMES = (DEST_CHECKLISTS[GORACHIY_DEST] || []).map(function (it) { return it.name; });
+  var GORACHIY_INDEX = buildIndex(GORACHIY_NAMES);
+  var GORACHIY_TOKEN_INDEX = buildTokenIndex(GORACHIY_INDEX);
+
+  function activeCatalog() {
+    if (cartDestSelect && cartDestSelect.value === GORACHIY_DEST) {
+      return { names: GORACHIY_NAMES, index: GORACHIY_INDEX, tokenIndex: GORACHIY_TOKEN_INDEX };
+    }
+    return { names: RAW_NAMES, index: GLOBAL_INDEX, tokenIndex: GLOBAL_TOKEN_INDEX };
+  }
+
+  function updateCountLabel() {
+    document.getElementById("countLabel").textContent = activeCatalog().names.length + " mahsulot";
+  }
+  updateCountLabel();
 
   var LATIN_MULTI = [["sh", "ш"], ["ch", "ч"], ["yu", "ю"], ["ya", "я"], ["ts", "ц"], ["o'", "ў"], ["g'", "ғ"]];
   var LATIN_MAP = {
@@ -832,6 +853,10 @@
     if (LATIN_RE.test(q) && !CYRILLIC_RE.test(q)) {
       q = toCyrillicPhonetic(q);
     }
+
+    var active = activeCatalog();
+    var PRODUCT_INDEX = active.index;
+    var TOKEN_INDEX = active.tokenIndex;
 
     var exact = [];
     for (var i = 0; i < PRODUCT_INDEX.length; i++) {
