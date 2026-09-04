@@ -711,11 +711,18 @@
   // bandlarga tegilmaydi, faqat oldingi checklist-bandlari almashtiriladi.
   function prefillChecklist(dest) {
     cart = cart.filter(function (it) { return !it.fromChecklist; });
-    var items = DEST_CHECKLISTS[dest] || [];
-    items.forEach(function (it) {
-      if (findCartIndex(it.name) !== -1) return; // qo'lda qo'shilgan bo'lsa, qayta qo'shmaymiz
-      cart.push({ name: it.name, qty: "", fromChecklist: true });
-    });
+    // 2026-09-04: foydalanuvchi so'rovi bilan -- Горячий склад uchun ENDI
+    // avtomatik checklist ko'rsatilmaydi (savat bo'sh boshlanadi). Buning
+    // o'rniga oddiy oqim: qidiruv qatoriga yozadi -> mos mahsulot(lar) tepada
+    // chiqadi -> bosilgani savatga qo'shiladi. Boshqa barcha destinatsiyalar
+    // uchun avtomatik checklist o'zgarishsiz qoladi.
+    if (dest !== GORACHIY_DEST) {
+      var items = DEST_CHECKLISTS[dest] || [];
+      items.forEach(function (it) {
+        if (findCartIndex(it.name) !== -1) return; // qo'lda qo'shilgan bo'lsa, qayta qo'shmaymiz
+        cart.push({ name: it.name, qty: "", fromChecklist: true });
+      });
+    }
     renderCart();
     updateCountLabel(); // Горячий tanlansa qidiruv ro'yxati ham cheklanadi -- sonini yangilaymiz
   }
