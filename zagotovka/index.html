@@ -16,6 +16,7 @@
     --accent-2: #2f6b4f;
     --border: #d5dad1;
     --shadow: 0 1px 2px rgba(28, 36, 32, 0.06), 0 4px 14px rgba(28, 36, 32, 0.05);
+    --overlay: rgba(20, 24, 20, 0.42);
     --radius: 14px;
     color-scheme: light;
   }
@@ -32,6 +33,7 @@
       --accent-2: #6ec096;
       --border: #37311f;
       --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+      --overlay: rgba(0, 0, 0, 0.6);
       color-scheme: dark;
     }
   }
@@ -47,6 +49,7 @@
     --accent-2: #6ec096;
     --border: #37311f;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+    --overlay: rgba(0, 0, 0, 0.6);
     color-scheme: dark;
   }
 
@@ -142,6 +145,253 @@
     font-size: 12px;
     color: var(--text-muted);
   }
+
+  /* 2026-09-05: foydalanuvchi so'rovi bilan -- har bir login o'zi yuborgan
+     zayavkalarni sana bo'yicha ko'ra oladigan Arxiv paneli (barcha login/
+     destinatsiyalar uchun, sof QO'SHIMCHA -- mavjud qidiruv/savat oqimiga
+     hech qanday ta'sir qilmaydi). */
+  .header-top-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .archive-btn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text);
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    margin-top: 1px;
+  }
+  .archive-btn:hover { border-color: var(--accent); }
+
+  .archive-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--overlay);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 200;
+  }
+  .archive-overlay.open { display: flex; }
+  @media (min-width: 560px) {
+    .archive-overlay { align-items: center; }
+  }
+
+  .archive-panel {
+    background: var(--surface);
+    width: 100%;
+    max-width: 520px;
+    max-height: 85vh;
+    border-radius: 18px 18px 0 0;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow);
+  }
+  @media (min-width: 560px) {
+    .archive-panel { border-radius: 18px; max-height: 78vh; }
+  }
+
+  .archive-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .archive-head h2 { margin: 0; font-size: 16px; font-weight: 800; }
+  .archive-head .who { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .archive-close {
+    border: none;
+    background: var(--surface-2);
+    color: var(--text-muted);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .archive-close:hover { color: var(--text); }
+
+  .day-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 12px 18px 4px;
+    align-items: center;
+  }
+  .day-tabs-scroll {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    flex: 1;
+    min-width: 0;
+  }
+  .day-tab {
+    flex-shrink: 0;
+    border: 1.5px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-muted);
+    border-radius: 999px;
+    padding: 7px 13px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .day-tab.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .cal-toggle {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cal-toggle.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+  .calendar {
+    display: none;
+    margin: 4px 18px 8px;
+    padding: 10px 4px 4px;
+    border-top: 1px solid var(--border);
+  }
+  .calendar.open { display: block; }
+  .cal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 6px 8px;
+  }
+  .cal-head .cal-month { font-size: 13.5px; font-weight: 800; }
+  .cal-nav {
+    border: none;
+    background: var(--surface-2);
+    color: var(--text);
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cal-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+  .cal-dow {
+    text-align: center;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+    padding: 4px 0 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  .cal-day {
+    position: relative;
+    aspect-ratio: 1;
+    border: none;
+    background: none;
+    color: var(--text);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cal-day:hover { background: var(--surface-2); }
+  .cal-day.other-month { color: var(--text-muted); opacity: 0.35; pointer-events: none; }
+  .cal-day.today { box-shadow: inset 0 0 0 1.5px var(--accent-2); }
+  .cal-day.selected { background: var(--accent); color: var(--accent-ink); }
+  .cal-day.future { color: var(--text-muted); opacity: 0.35; pointer-events: none; }
+  .cal-day .cal-dot {
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent-2);
+  }
+  .cal-day.selected .cal-dot { background: var(--accent-ink); }
+
+  .archive-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 18px 18px;
+  }
+  .archive-empty {
+    padding: 30px 4px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13.5px;
+  }
+  .archive-loading {
+    padding: 30px 4px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13.5px;
+  }
+
+  .dest-group { margin-top: 16px; }
+  .dest-group:first-child { margin-top: 10px; }
+  .dest-name {
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--accent-2);
+    margin-bottom: 6px;
+  }
+  .arch-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+  .arch-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: var(--surface-2);
+    border-radius: 9px;
+    padding: 8px 11px;
+    font-size: 13.5px;
+  }
+  .arch-item .qty { font-variant-numeric: tabular-nums; color: var(--text-muted); flex-shrink: 0; }
+
+  .archive-summary {
+    padding: 10px 18px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+  }
+  .archive-summary b { color: var(--text); }
 
   main {
     flex: 1;
@@ -539,8 +789,13 @@
 </div>
 
 <header>
-  <p class="eyebrow">Zagotovka &middot; Ombor kataloги</p>
-  <h1>Mahsulot nomini toping</h1>
+  <div class="header-top-row">
+    <div>
+      <p class="eyebrow">Zagotovka &middot; Ombor kataloги</p>
+      <h1>Mahsulot nomini toping</h1>
+    </div>
+    <button class="archive-btn" id="archiveBtn" type="button">🗂 Arxiv</button>
+  </div>
   <div class="search-wrap">
     <input id="q" type="text" placeholder="Masalan: qusqavoy, gijduvon..." autocomplete="off" autocapitalize="off" spellcheck="false" />
     <button id="clearBtn" aria-label="Tozalash">&times;</button>
@@ -550,6 +805,32 @@
     <span id="statusLabel"></span>
   </div>
 </header>
+
+<div class="archive-overlay" id="archiveOverlay">
+  <div class="archive-panel" role="dialog" aria-modal="true" aria-labelledby="archiveTitle">
+    <div class="archive-head">
+      <div>
+        <h2 id="archiveTitle">Mening arxivim</h2>
+        <p class="who" id="archiveWho">faqat o'zingiz yuborgan zayavkalar</p>
+      </div>
+      <button class="archive-close" id="archiveCloseBtn" type="button" aria-label="Yopish">×</button>
+    </div>
+    <div class="day-tabs">
+      <div class="day-tabs-scroll" id="dayTabs"></div>
+      <button class="cal-toggle" id="calToggleBtn" type="button" aria-label="Kalendardan sana tanlash">📅</button>
+    </div>
+    <div class="calendar" id="calendar">
+      <div class="cal-head">
+        <button class="cal-nav" id="calPrevBtn" type="button" aria-label="Oldingi oy">‹</button>
+        <span class="cal-month" id="calMonthLabel"></span>
+        <button class="cal-nav" id="calNextBtn" type="button" aria-label="Keyingi oy">›</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+    <div class="archive-body" id="archiveBody"></div>
+    <div class="archive-summary" id="archiveSummary"></div>
+  </div>
+</div>
 
 <div class="cart" id="cart">
   <div class="cart-head">
@@ -1245,6 +1526,228 @@
     qInput.value = "";
     qInput.focus();
     render("");
+  });
+
+  // ---- Arxiv (2026-09-05, foydalanuvchi so'rovi bilan): har login o'zi
+  // yuborgan zayavkalarni sana bo'yicha ko'radi -- barcha login/destinatsiya
+  // uchun, sof QO'SHIMCHA (qidiruv/savat oqimiga ta'sir qilmaydi). Backend:
+  // POST /archive/month {login,pass,year,month} -> {ok, days:{ "YYYY-MM-DD":
+  // {dests,items} }} (faqat shu loginning o'zi uchun).
+  var archiveBtn = document.getElementById("archiveBtn");
+  var archiveOverlay = document.getElementById("archiveOverlay");
+  var archiveCloseBtn = document.getElementById("archiveCloseBtn");
+  var archiveWho = document.getElementById("archiveWho");
+  var dayTabsEl = document.getElementById("dayTabs");
+  var archiveBodyEl = document.getElementById("archiveBody");
+  var archiveSummaryEl = document.getElementById("archiveSummary");
+  var calToggleBtn = document.getElementById("calToggleBtn");
+  var calendarEl = document.getElementById("calendar");
+  var calGridEl = document.getElementById("calGrid");
+  var calMonthLabel = document.getElementById("calMonthLabel");
+  var calPrevBtn = document.getElementById("calPrevBtn");
+  var calNextBtn = document.getElementById("calNextBtn");
+
+  var MONTH_NAMES = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentyabr", "Oktyabr", "Noyabr", "Dekabr"];
+  var DOW_NAMES = ["Du", "Se", "Ch", "Pa", "Ju", "Sh", "Ya"];
+  var monthCache = {}; // "YYYY-MM" -> {days}
+  var activeArchiveDay = null;
+  var calViewYear, calViewMonth;
+
+  function apad2(n) { return n < 10 ? "0" + n : String(n); }
+  function archiveDateKey(y, m, d) { return y + "-" + apad2(m + 1) + "-" + apad2(d); }
+  function archiveIsSameDay(a, b) { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
+  function monthKeyOf(y, m) { return y + "-" + apad2(m + 1); }
+
+  function formatArchiveQty(it) {
+    var n = it.num;
+    var display = Number.isInteger(n) ? String(n) : n.toFixed(1);
+    var suffix = it.suffix || "";
+    var unit = GLOBAL_UNITS[it.name];
+    if (!suffix.trim() && unit) suffix = " " + unit;
+    return display + suffix;
+  }
+
+  function fetchMonth(y, m) {
+    var mk = monthKeyOf(y, m);
+    if (monthCache[mk]) return Promise.resolve(monthCache[mk]);
+    return fetch(SEND_ENDPOINT + "/archive/month", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ login: siteAuth.login, pass: siteAuth.pass, year: y, month: m + 1 }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var days = data && data.ok ? data.days || {} : {};
+        monthCache[mk] = days;
+        return days;
+      })
+      .catch(function () { return {}; });
+  }
+
+  function quickDayList() {
+    // Tez tugmalar: Bugun, Kecha -- kalendar orqali istalgan boshqa kunni
+    // topish mumkin.
+    var out = [];
+    var d0 = new Date();
+    for (var i = 0; i < 2; i++) {
+      var d = new Date(d0.getFullYear(), d0.getMonth(), d0.getDate() - i);
+      out.push({ key: archiveDateKey(d.getFullYear(), d.getMonth(), d.getDate()), label: i === 0 ? "Bugun" : "Kecha" });
+    }
+    return out;
+  }
+
+  function renderArchiveTabs() {
+    dayTabsEl.innerHTML = "";
+    quickDayList().forEach(function (d) {
+      var btn = document.createElement("button");
+      btn.className = "day-tab" + (d.key === activeArchiveDay ? " active" : "");
+      btn.type = "button";
+      btn.textContent = d.label;
+      btn.addEventListener("click", function () { showDay(d.key); });
+      dayTabsEl.appendChild(btn);
+    });
+  }
+
+  function renderCalendar(days) {
+    calMonthLabel.textContent = MONTH_NAMES[calViewMonth] + " " + calViewYear;
+    var today = new Date();
+    var isCurrentMonth = calViewYear === today.getFullYear() && calViewMonth === today.getMonth();
+    calNextBtn.disabled = isCurrentMonth;
+
+    calGridEl.innerHTML = "";
+    DOW_NAMES.forEach(function (d) {
+      var el = document.createElement("div");
+      el.className = "cal-dow";
+      el.textContent = d;
+      calGridEl.appendChild(el);
+    });
+
+    var firstOfMonth = new Date(calViewYear, calViewMonth, 1);
+    var leadingBlanks = (firstOfMonth.getDay() + 6) % 7; // Dushanba = 0
+    var daysInMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate();
+    var daysInPrevMonth = new Date(calViewYear, calViewMonth, 0).getDate();
+
+    var cells = [];
+    for (var i = leadingBlanks; i > 0; i--) cells.push({ day: daysInPrevMonth - i + 1, otherMonth: true });
+    for (var d1 = 1; d1 <= daysInMonth; d1++) cells.push({ day: d1, otherMonth: false });
+    while (cells.length % 7 !== 0) cells.push({ day: cells.length - leadingBlanks - daysInMonth + 1, otherMonth: true });
+
+    cells.forEach(function (cell) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "cal-day";
+      btn.textContent = cell.day;
+      if (cell.otherMonth) {
+        btn.classList.add("other-month");
+      } else {
+        var cellDate = new Date(calViewYear, calViewMonth, cell.day);
+        var key = archiveDateKey(calViewYear, calViewMonth, cell.day);
+        if (archiveIsSameDay(cellDate, today)) btn.classList.add("today");
+        if (key === activeArchiveDay) btn.classList.add("selected");
+        if (cellDate > today) {
+          btn.classList.add("future");
+        } else {
+          btn.addEventListener("click", function () { showDay(key); });
+          if (days[key] && days[key].items && days[key].items.length > 0) {
+            var dot = document.createElement("span");
+            dot.className = "cal-dot";
+            btn.appendChild(dot);
+          }
+        }
+      }
+      calGridEl.appendChild(btn);
+    });
+  }
+
+  function labelForArchiveKey(key) {
+    var now = new Date();
+    var todayKey = archiveDateKey(now.getFullYear(), now.getMonth(), now.getDate());
+    var y0 = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    var yestKey = archiveDateKey(y0.getFullYear(), y0.getMonth(), y0.getDate());
+    if (key === todayKey) return "Bugun";
+    if (key === yestKey) return "Kecha";
+    var parts = key.split("-");
+    return parts[2] + "." + parts[1];
+  }
+
+  function renderDayBody(days) {
+    var dayData = days[activeArchiveDay];
+    var label = labelForArchiveKey(activeArchiveDay);
+    if (!dayData || !dayData.items || dayData.items.length === 0) {
+      archiveBodyEl.innerHTML = '<div class="archive-empty">' + label + " kuni hech qanday zayavka yuborilmagan.</div>";
+      archiveSummaryEl.textContent = "";
+      return;
+    }
+    archiveBodyEl.innerHTML = "";
+    var group = document.createElement("div");
+    group.className = "dest-group";
+    if (dayData.dests && dayData.dests.length) {
+      var destName = document.createElement("div");
+      destName.className = "dest-name";
+      destName.textContent = dayData.dests.map(function (d) { return d.replace(/^[^:]*:\s*/, ""); }).join(", ");
+      group.appendChild(destName);
+    }
+    var ul = document.createElement("ul");
+    ul.className = "arch-list";
+    dayData.items.forEach(function (it) {
+      var li = document.createElement("li");
+      li.className = "arch-item";
+      li.innerHTML = "<span>" + escapeHtml(it.name) + '</span><span class="qty">' + formatArchiveQty(it) + "</span>";
+      ul.appendChild(li);
+    });
+    group.appendChild(ul);
+    archiveBodyEl.appendChild(group);
+    archiveSummaryEl.innerHTML = "<span><b>" + dayData.items.length + "</b> band</span><span>" + label + "</span>";
+  }
+
+  function showMonth(y, m) {
+    calViewYear = y;
+    calViewMonth = m;
+    fetchMonth(y, m).then(function (days) { renderCalendar(days); });
+  }
+
+  function showDay(key) {
+    activeArchiveDay = key;
+    renderArchiveTabs();
+    var parts = key.split("-").map(Number);
+    var y = parts[0], m = parts[1] - 1;
+    fetchMonth(y, m).then(function (days) {
+      renderDayBody(days);
+      if (calViewYear === y && calViewMonth === m) renderCalendar(days);
+    });
+  }
+
+  function openArchive() {
+    archiveWho.textContent = (siteAuth.login || "") + " · faqat o'zingiz yuborgan zayavkalar";
+    archiveOverlay.classList.add("open");
+    archiveBodyEl.innerHTML = '<div class="archive-loading">Yuklanmoqda...</div>';
+    var today = new Date();
+    showMonth(today.getFullYear(), today.getMonth());
+    showDay(archiveDateKey(today.getFullYear(), today.getMonth(), today.getDate()));
+  }
+  function closeArchive() { archiveOverlay.classList.remove("open"); }
+
+  archiveBtn.addEventListener("click", openArchive);
+  archiveCloseBtn.addEventListener("click", closeArchive);
+  archiveOverlay.addEventListener("click", function (e) { if (e.target === archiveOverlay) closeArchive(); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && archiveOverlay.classList.contains("open")) closeArchive();
+  });
+
+  calToggleBtn.addEventListener("click", function () {
+    var open = calendarEl.classList.toggle("open");
+    calToggleBtn.classList.toggle("active", open);
+  });
+  calPrevBtn.addEventListener("click", function () {
+    calViewMonth--;
+    if (calViewMonth < 0) { calViewMonth = 11; calViewYear--; }
+    showMonth(calViewYear, calViewMonth);
+  });
+  calNextBtn.addEventListener("click", function () {
+    if (calNextBtn.disabled) return;
+    calViewMonth++;
+    if (calViewMonth > 11) { calViewMonth = 0; calViewYear++; }
+    showMonth(calViewYear, calViewMonth);
   });
 
   render("");
