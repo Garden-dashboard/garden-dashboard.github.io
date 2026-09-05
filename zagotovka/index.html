@@ -178,6 +178,14 @@
   body.pinned-cart-top header {
     position: static;
   }
+  /* Ro'yxat uzun bo'lib ketsa (savat tepada, sticky), butun sahifani bosib
+     qolmasligi uchun -- FAQAT ro'yxatning o'zi ichkarida aylanadi (scroll),
+     qidiruv qatori va "Guruhga yuborish" tugmasi doim ko'rinishda qoladi. */
+  body.pinned-cart-top #cartList {
+    max-height: 34vh;
+    overflow-y: auto;
+    padding-right: 2px;
+  }
 
   .cart-head {
     display: flex;
