@@ -160,6 +160,25 @@
   }
   .cart.has-items { display: block; }
 
+  /* 2026-09-05: foydalanuvchi so'rovi bilan -- Горячий склад uchun (sinov
+     sifatida) "Tanlangan" savat endi sahifaning ENG TEPASIGA chiqariladi va
+     doim ko'rinib turadi (sticky), qidiruv qatoridan ham yuqorida -- body
+     flex-column bo'lgani uchun buni faqat "order" bilan, DOM tuzilishiga
+     tegmasdan amalga oshiramiz. Boshqa destinatsiyalar uchun o'zgarishsiz. */
+  body.pinned-cart-top .cart {
+    order: -1;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--bg);
+    box-shadow: var(--shadow);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+  }
+  body.pinned-cart-top header {
+    position: static;
+  }
+
   .cart-head {
     display: flex;
     align-items: baseline;
@@ -710,6 +729,8 @@
   // (2026-09-01, foydalanuvchi so'rovi bilan). Qo'lda qidirib qo'shilgan
   // bandlarga tegilmaydi, faqat oldingi checklist-bandlari almashtiriladi.
   function prefillChecklist(dest) {
+    // Горячий uchun (sinov) savat sahifa boshiga chiqariladi va sticky bo'ladi.
+    document.body.classList.toggle("pinned-cart-top", dest === GORACHIY_DEST);
     cart = cart.filter(function (it) { return !it.fromChecklist; });
     // 2026-09-04: foydalanuvchi so'rovi bilan -- Горячий склад uchun ENDI
     // avtomatik checklist ko'rsatilmaydi (savat bo'sh boshlanadi). Buning
