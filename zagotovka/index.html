@@ -495,8 +495,48 @@
     border-radius: 10px;
     padding: 9px 8px 9px 12px;
     display: flex;
+    flex-direction: column;
+  }
+  .cart-item-row {
+    display: flex;
     align-items: center;
     gap: 8px;
+  }
+  .comment-toggle {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 15px;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .comment-toggle:hover { background: var(--border); }
+  .comment-toggle.has-comment { color: var(--accent-2); }
+  .comment-box { display: none; margin-top: 6px; }
+  .comment-box.open { display: block; }
+  .comment-box input {
+    width: 100%;
+    font-family: inherit;
+    font-size: 12.5px;
+    padding: 7px 9px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+  }
+  .comment-box input:focus { border-color: var(--accent); }
+  .comment-pill {
+    margin-top: 4px;
+    font-size: 11.5px;
+    color: var(--accent-2);
+    cursor: pointer;
   }
 
   .cart-item-name {
@@ -1288,7 +1328,9 @@
   function buildZayavkaText() {
     var lines = filledCart().map(function (item) {
       var flag = productSourceMap[item.name] ? "" : " ❓";
-      return item.name + " - " + item.qty.trim() + flag;
+      var line = item.name + " - " + item.qty.trim() + flag;
+      if (item.comment && item.comment.trim()) line += "\n    💬 " + item.comment.trim();
+      return line;
     });
     var when = selectedDateDisplay();
     var headerLines = [cartDestSelect.value];
@@ -1308,6 +1350,9 @@
     cart.forEach(function (item, idx) {
       var li = document.createElement("li");
       li.className = "cart-item";
+
+      var row = document.createElement("div");
+      row.className = "cart-item-row";
 
       var nameSpan = document.createElement("span");
       nameSpan.className = "cart-item-name";
@@ -1331,6 +1376,52 @@
         unitSpan.textContent = unit;
       }
 
+      // 2026-09-09: foydalanuvchi so'rovi bilan -- har bandga kichik izoh
+      // (masalan "yog'siz bo'lsin") qo'shish imkoniyati, guruh xabarida
+      // shu mahsulot qatori ostida ko'rsatiladi.
+      var commentBox = document.createElement("div");
+      commentBox.className = "comment-box";
+      var commentInput = document.createElement("input");
+      commentInput.type = "text";
+      commentInput.placeholder = "Izoh yozing (masalan: yog'siz bo'lsin)";
+      commentInput.maxLength = 60;
+      commentInput.value = item.comment || "";
+      commentBox.appendChild(commentInput);
+
+      var commentPill = document.createElement("div");
+      commentPill.className = "comment-pill";
+      commentPill.style.display = "none";
+
+      function updateCommentUi() {
+        var v = commentInput.value.trim();
+        cart[idx].comment = v;
+        commentToggle.classList.toggle("has-comment", !!v);
+        var boxOpen = commentBox.classList.contains("open");
+        if (v && !boxOpen) {
+          commentPill.style.display = "block";
+          commentPill.textContent = "💬 " + v;
+        } else {
+          commentPill.style.display = "none";
+        }
+      }
+
+      var commentToggle = document.createElement("button");
+      commentToggle.className = "comment-toggle";
+      commentToggle.type = "button";
+      commentToggle.setAttribute("aria-label", "Izoh qo'shish");
+      commentToggle.textContent = "💬";
+      commentToggle.addEventListener("click", function () {
+        commentBox.classList.toggle("open");
+        if (commentBox.classList.contains("open")) commentInput.focus();
+        updateCommentUi();
+      });
+      commentPill.addEventListener("click", function () {
+        commentBox.classList.add("open");
+        commentInput.focus();
+        updateCommentUi();
+      });
+      commentInput.addEventListener("input", updateCommentUi);
+
       var removeBtn = document.createElement("button");
       removeBtn.className = "cart-remove";
       removeBtn.type = "button";
@@ -1341,11 +1432,17 @@
         renderCart();
       });
 
-      li.appendChild(nameSpan);
-      li.appendChild(qtyInput);
-      if (unitSpan) li.appendChild(unitSpan);
-      li.appendChild(removeBtn);
+      row.appendChild(nameSpan);
+      row.appendChild(qtyInput);
+      if (unitSpan) row.appendChild(unitSpan);
+      row.appendChild(commentToggle);
+      row.appendChild(removeBtn);
+      li.appendChild(row);
+      li.appendChild(commentBox);
+      li.appendChild(commentPill);
       cartListEl.appendChild(li);
+
+      updateCommentUi();
 
       if (item.name === focusName) {
         setTimeout(function () { qtyInput.focus(); }, 30);
@@ -1399,7 +1496,7 @@
         pass: siteAuth.pass,
         dest: cartDestSelect.value,
         when: selectedDateDisplay(),
-        items: filledCart().map(function (it) { return { name: it.name, qty: it.qty }; }),
+        items: filledCart().map(function (it) { return { name: it.name, qty: it.qty, comment: it.comment || "" }; }),
       }),
     })
       .then(function (r) { return r.json(); })
