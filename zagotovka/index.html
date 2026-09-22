@@ -1,3 +1,8 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zayavka Qidiruv</title>
 <style>
   :root {
@@ -441,7 +446,7 @@
   }
   .cart-date-input {
     flex: 1;
-    font-size: 14px;
+    font-size: 16px;
     font-family: inherit;
     font-variant-numeric: tabular-nums;
     padding: 8px 10px;
@@ -518,7 +523,7 @@
   .comment-box input {
     width: 100%;
     font-family: inherit;
-    font-size: 12.5px;
+    font-size: 16px;
     padding: 7px 9px;
     border-radius: 8px;
     border: 1.5px solid var(--border);
@@ -541,11 +546,11 @@
   }
 
   .cart-qty {
-    width: 74px;
+    width: 80px;
     flex-shrink: 0;
-    font-size: 14px;
+    font-size: 16px;
     font-family: inherit;
-    padding: 7px 8px;
+    padding: 7px 6px;
     border-radius: 8px;
     border: 1.5px solid var(--border);
     background: var(--surface);
@@ -841,14 +846,16 @@
   }
   .inv-item-name { flex: 1; font-size: 13.5px; }
   .inv-qty {
-    width: 78px; flex-shrink: 0; font-size: 14px; font-family: inherit;
-    padding: 7px 8px; border-radius: 8px; border: 1.5px solid var(--border);
+    width: 84px; flex-shrink: 0; font-size: 16px; font-family: inherit;
+    padding: 7px 6px; border-radius: 8px; border: 1.5px solid var(--border);
     background: var(--surface); color: var(--text); text-align: center;
   }
   .inv-qty:focus { outline: none; border-color: var(--accent); }
   .inv-unit { font-size: 11px; color: var(--text-muted); flex-shrink: 0; min-width: 22px; }
   .inv-result { font-size: 13px; color: var(--accent-2); min-height: 18px; margin: 8px 2px 0; }
 </style>
+</head>
+<body>
 
 <div class="lock-screen" id="lockScreen">
   <div class="lock-card">
@@ -2075,3 +2082,6 @@
   render("");
 })();
 </script>
+
+</body>
+</html>
