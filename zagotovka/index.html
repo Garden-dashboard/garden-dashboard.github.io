@@ -805,6 +805,55 @@
     padding: 6px;
     box-shadow: var(--shadow);
   }
+
+  /* 2026-09-22: foydalanuvchi so'rovi bilan -- Горячий склад (Sawa/Suxrob)
+     loginlari uchun "Inventarizatsiya" bo'limi. Faqat shu loginlar uchun
+     ko'rinadi, "Zayavka" oqimiga hech qanday ta'sir qilmaydi. */
+  .mode-tabs {
+    display: none;
+    gap: 8px;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 16px 12px;
+  }
+  .mode-tabs.show { display: flex; }
+  .mode-tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .mode-tab.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+  body.mode-inventory .search-wrap,
+  body.mode-inventory .meta-row,
+  body.mode-inventory .cart,
+  body.mode-inventory main { display: none !important; }
+  #inventorySection { display: none; max-width: 640px; margin: 0 auto; padding: 4px 16px 40px; }
+  body.mode-inventory #inventorySection { display: block; }
+
+  .inv-sub { margin: 0 0 16px; font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+  ul#inventoryList { list-style: none; margin: 0 0 16px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  li.inv-item {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 9px 12px;
+  }
+  .inv-item-name { flex: 1; font-size: 13.5px; }
+  .inv-qty {
+    width: 78px; flex-shrink: 0; font-size: 14px; font-family: inherit;
+    padding: 7px 8px; border-radius: 8px; border: 1.5px solid var(--border);
+    background: var(--surface); color: var(--text); text-align: center;
+  }
+  .inv-qty:focus { outline: none; border-color: var(--accent); }
+  .inv-unit { font-size: 11px; color: var(--text-muted); flex-shrink: 0; min-width: 22px; }
+  .inv-result { font-size: 13px; color: var(--accent-2); min-height: 18px; margin: 8px 2px 0; }
 </style>
 </head>
 <body>
@@ -845,6 +894,11 @@
     <span id="statusLabel"></span>
   </div>
 </header>
+
+<div class="mode-tabs" id="modeTabs">
+  <button class="mode-tab active" id="tabZayavkaBtn" type="button">📝 Zayavka</button>
+  <button class="mode-tab" id="tabInventoryBtn" type="button">📋 Inventarizatsiya</button>
+</div>
 
 <div class="archive-overlay" id="archiveOverlay">
   <div class="archive-panel" role="dialog" aria-modal="true" aria-labelledby="archiveTitle">
@@ -902,6 +956,17 @@
   </div>
   <ul id="results"></ul>
 </main>
+
+<section id="inventorySection">
+  <p class="eyebrow">Zagotovka · Inventarizatsiya</p>
+  <h1>Haqiqiy qoldiqni kiriting</h1>
+  <p class="inv-sub">Har mahsulot yoniga omborda hozir haqiqatda bor miqdorni yozing. Bo'sh qoldirilgan bandlar yuborilmaydi.</p>
+  <ul id="inventoryList"></ul>
+  <div class="cart-actions">
+    <button class="cart-send-btn" id="inventorySendBtn" type="button">Yuborish</button>
+  </div>
+  <p class="inv-result" id="inventoryResult"></p>
+</section>
 
 <footer>
   <p class="qr-title">📱 Bu sahifaga tez kirish uchun QR kod</p>
@@ -1063,6 +1128,9 @@
       applyDefaultDayOffset();
       populateDestOptions();
       prefillChecklist(cartDestSelect.value);
+      setMode("zayavka");
+      modeTabs.classList.toggle("show", hasInventoryAccess());
+      if (hasInventoryAccess()) renderInventoryList();
       fetch(SEND_ENDPOINT + "/admin/map")
         .then(function (r) { return r.json(); })
         .then(function (data) { if (data.ok) productSourceMap = data.map || {}; })
@@ -1845,6 +1913,104 @@
     calViewMonth++;
     if (calViewMonth > 11) { calViewMonth = 0; calViewYear++; }
     showMonth(calViewYear, calViewMonth);
+  });
+
+  // 2026-09-22: foydalanuvchi so'rovi bilan -- Горячий склад (Sawa/Suxrob)
+  // loginlari uchun "Inventarizatsiya" bo'limi. Hozircha faqat: (1) shu
+  // loginlarga ko'rinadi, (2) mahsulot ro'yxati (Горячийning o'zi kabi 70
+  // ta) + haqiqiy miqdor kiritish, (3) yuborilgan ma'lumot serverda
+  // saqlanadi. Qayerga xabar borishi (guruh, накладnoy va h.k.) keyinroq
+  // hal qilinadi -- shuning uchun bu yerda Telegram'ga hech narsa
+  // yuborilmaydi, faqat KV'ga yoziladi.
+  var modeTabs = document.getElementById("modeTabs");
+  var tabZayavkaBtn = document.getElementById("tabZayavkaBtn");
+  var tabInventoryBtn = document.getElementById("tabInventoryBtn");
+  var inventoryList = document.getElementById("inventoryList");
+  var inventorySendBtn = document.getElementById("inventorySendBtn");
+  var inventoryResult = document.getElementById("inventoryResult");
+
+  function hasInventoryAccess() {
+    var role = ROLES[siteAuth.login];
+    return !!(role && role.dest === GORACHIY_DEST);
+  }
+
+  function setMode(mode) {
+    document.body.classList.toggle("mode-inventory", mode === "inventory");
+    tabZayavkaBtn.classList.toggle("active", mode !== "inventory");
+    tabInventoryBtn.classList.toggle("active", mode === "inventory");
+  }
+
+  function renderInventoryList() {
+    inventoryList.innerHTML = "";
+    GORACHIY_NAMES.forEach(function (name) {
+      var li = document.createElement("li");
+      li.className = "inv-item";
+
+      var nameSpan = document.createElement("span");
+      nameSpan.className = "inv-item-name";
+      nameSpan.textContent = name;
+
+      var qtyInput = document.createElement("input");
+      qtyInput.className = "inv-qty";
+      qtyInput.type = "text";
+      qtyInput.inputMode = "decimal";
+      qtyInput.placeholder = "soni";
+      qtyInput.dataset.name = name;
+
+      var unit = GLOBAL_UNITS[name];
+      li.appendChild(nameSpan);
+      li.appendChild(qtyInput);
+      if (unit) {
+        var unitSpan = document.createElement("span");
+        unitSpan.className = "inv-unit";
+        unitSpan.textContent = unit;
+        li.appendChild(unitSpan);
+      }
+      inventoryList.appendChild(li);
+    });
+  }
+
+  tabZayavkaBtn.addEventListener("click", function () { setMode("zayavka"); });
+  tabInventoryBtn.addEventListener("click", function () {
+    setMode("inventory");
+    inventoryResult.textContent = "";
+  });
+
+  inventorySendBtn.addEventListener("click", function () {
+    var items = [];
+    Array.prototype.forEach.call(inventoryList.querySelectorAll(".inv-qty"), function (input) {
+      var v = input.value.trim();
+      if (v) items.push({ name: input.dataset.name, qty: v });
+    });
+    if (items.length === 0) {
+      inventoryResult.textContent = "Hech qanday son kiritilmagan.";
+      return;
+    }
+    inventorySendBtn.disabled = true;
+    inventoryResult.textContent = "Yuborilmoqda...";
+    fetch(SEND_ENDPOINT + "/inventory/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        login: siteAuth.login,
+        pass: siteAuth.pass,
+        dest: GORACHIY_DEST,
+        items: items,
+      }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        inventorySendBtn.disabled = false;
+        if (data.ok) {
+          inventoryResult.textContent = "✅ Saqlandi (" + items.length + " band).";
+        } else {
+          inventoryResult.textContent = "Xato: " + (data.error || "noma'lum");
+        }
+      })
+      .catch(function () {
+        inventorySendBtn.disabled = false;
+        inventoryResult.textContent = "Internet aloqasi bilan muammo. Qayta urinib ko'ring.";
+      });
   });
 
   render("");
