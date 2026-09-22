@@ -812,15 +812,14 @@
   .mode-tabs {
     display: none;
     gap: 8px;
-    max-width: 640px;
-    margin: 0 auto;
+    justify-content: flex-start;
     padding: 0 16px 12px;
   }
   .mode-tabs.show { display: flex; }
   .mode-tab {
-    flex: 1;
+    flex: 0 0 auto;
     text-align: center;
-    padding: 10px;
+    padding: 10px 18px;
     border-radius: 10px;
     border: 1.5px solid var(--border);
     background: var(--surface-2);
