@@ -2036,7 +2036,11 @@
       .then(function (data) {
         inventorySendBtn.disabled = false;
         if (data.ok) {
-          inventoryResult.textContent = "✅ Saqlandi (" + items.length + " band).";
+          var msg = "✅ Iikoga yozildi — Инвентаризация №" + data.documentNumber + " (" + items.length + " band).";
+          if (data.missing && data.missing.length) {
+            msg += " ⚠️ Topilmadi: " + data.missing.join(", ");
+          }
+          inventoryResult.textContent = msg;
         } else {
           inventoryResult.textContent = "Xato: " + (data.error || "noma'lum");
         }
