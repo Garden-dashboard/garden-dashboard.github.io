@@ -1130,7 +1130,6 @@
       prefillChecklist(cartDestSelect.value);
       setMode("zayavka");
       modeTabs.classList.toggle("show", hasInventoryAccess());
-      if (hasInventoryAccess()) renderInventoryList();
       fetch(SEND_ENDPOINT + "/admin/map")
         .then(function (r) { return r.json(); })
         .then(function (data) { if (data.ok) productSourceMap = data.map || {}; })
@@ -1940,40 +1939,76 @@
     tabInventoryBtn.classList.toggle("active", mode === "inventory");
   }
 
-  function renderInventoryList() {
+  var inventoryLoaded = false;
+
+  function buildInventoryRows(items) {
     inventoryList.innerHTML = "";
-    GORACHIY_NAMES.forEach(function (name) {
+    items.forEach(function (it) {
       var li = document.createElement("li");
       li.className = "inv-item";
 
       var nameSpan = document.createElement("span");
       nameSpan.className = "inv-item-name";
-      nameSpan.textContent = name;
+      nameSpan.textContent = it.name;
 
       var qtyInput = document.createElement("input");
       qtyInput.className = "inv-qty";
       qtyInput.type = "text";
       qtyInput.inputMode = "decimal";
       qtyInput.placeholder = "soni";
-      qtyInput.dataset.name = name;
+      qtyInput.dataset.name = it.name;
 
-      var unit = GLOBAL_UNITS[name];
       li.appendChild(nameSpan);
       li.appendChild(qtyInput);
-      if (unit) {
+      if (it.unit) {
         var unitSpan = document.createElement("span");
         unitSpan.className = "inv-unit";
-        unitSpan.textContent = unit;
+        unitSpan.textContent = it.unit;
         li.appendChild(unitSpan);
       }
       inventoryList.appendChild(li);
     });
   }
 
+  // 2026-09-22: foydalanuvchi so'rovi bilan -- ro'yxat endi zagotovka
+  // tarixidan emas, Garden Горячийning HAQIQIY joriy qoldig'idan (o'zining
+  // iikosidan, jonli) olinadi -- shu omborda haqiqatda bor BARCHA tovar
+  // qatnashsin deb. Bo'lim ochilganda bir marta yuklanadi (keyin qayta
+  // ochilsa qayta so'rov yubormaydi -- server tomonida ham 1 soatlik keshi bor).
+  function renderInventoryList() {
+    if (inventoryLoaded) return;
+    inventoryList.innerHTML = "";
+    var loadingLi = document.createElement("li");
+    loadingLi.className = "inv-item";
+    loadingLi.textContent = "Yuklanmoqda...";
+    inventoryList.appendChild(loadingLi);
+
+    fetch(SEND_ENDPOINT + "/inventory/items", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ login: siteAuth.login, pass: siteAuth.pass }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.ok) {
+          inventoryLoaded = true;
+          buildInventoryRows(data.items);
+        } else {
+          inventoryList.innerHTML = "";
+          inventoryResult.textContent = "Xato: " + (data.error || "noma'lum");
+        }
+      })
+      .catch(function () {
+        inventoryList.innerHTML = "";
+        inventoryResult.textContent = "Internet aloqasi bilan muammo. Qayta urinib ko'ring.";
+      });
+  }
+
   tabZayavkaBtn.addEventListener("click", function () { setMode("zayavka"); });
   tabInventoryBtn.addEventListener("click", function () {
     setMode("inventory");
     inventoryResult.textContent = "";
+    renderInventoryList();
   });
 
   inventorySendBtn.addEventListener("click", function () {
