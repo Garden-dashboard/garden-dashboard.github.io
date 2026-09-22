@@ -1,8 +1,3 @@
-<!DOCTYPE html>
-<html lang="uz">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zayavka Qidiruv</title>
 <style>
   :root {
@@ -854,8 +849,6 @@
   .inv-unit { font-size: 11px; color: var(--text-muted); flex-shrink: 0; min-width: 22px; }
   .inv-result { font-size: 13px; color: var(--accent-2); min-height: 18px; margin: 8px 2px 0; }
 </style>
-</head>
-<body>
 
 <div class="lock-screen" id="lockScreen">
   <div class="lock-card">
@@ -960,6 +953,13 @@
   <p class="eyebrow">Zagotovka · Inventarizatsiya</p>
   <h1>Haqiqiy qoldiqni kiriting</h1>
   <p class="inv-sub">Har mahsulot yoniga omborda hozir haqiqatda bor miqdorni yozing. Bo'sh qoldirilgan bandlar yuborilmaydi.</p>
+  <div class="cart-date-row">
+    <label class="cart-date-label">📅 Sana</label>
+    <div class="date-toggle" id="invDateToggle">
+      <button type="button" class="date-toggle-btn active" data-day="0">Bugun</button>
+      <button type="button" class="date-toggle-btn" data-day="1">Ertaga</button>
+    </div>
+  </div>
   <ul id="inventoryList"></ul>
   <div class="cart-actions">
     <button class="cart-send-btn" id="inventorySendBtn" type="button">Yuborish</button>
@@ -1926,6 +1926,26 @@
   var inventoryList = document.getElementById("inventoryList");
   var inventorySendBtn = document.getElementById("inventorySendBtn");
   var inventoryResult = document.getElementById("inventoryResult");
+  var invDateToggle = document.getElementById("invDateToggle");
+  var selectedInvDayOffset = 0; // 0 = Bugun, 1 = Ertaga
+
+  // 2026-09-22: foydalanuvchi so'rovi bilan -- saytda qaysi sana (Bugun/
+  // Ertaga) tanlangan bo'lsa, iikodagi Инвентаризация hujjati ham aynan
+  // shu sana bilan yaratilishi kerak.
+  invDateToggle.addEventListener("click", function (e) {
+    var btn = e.target.closest(".date-toggle-btn");
+    if (!btn) return;
+    selectedInvDayOffset = parseInt(btn.getAttribute("data-day"), 10);
+    Array.prototype.forEach.call(invDateToggle.querySelectorAll(".date-toggle-btn"), function (b) {
+      b.classList.toggle("active", b === btn);
+    });
+  });
+
+  function selectedInvDateDisplay() {
+    var d = new Date(Date.now() + selectedInvDayOffset * 24 * 60 * 60 * 1000);
+    var p = tashkentParts(d);
+    return p.day + "." + p.month + "." + p.year;
+  }
 
   function hasInventoryAccess() {
     var role = ROLES[siteAuth.login];
@@ -2029,6 +2049,7 @@
         login: siteAuth.login,
         pass: siteAuth.pass,
         dest: GORACHIY_DEST,
+        when: selectedInvDateDisplay(),
         items: items,
       }),
     })
@@ -2036,7 +2057,7 @@
       .then(function (data) {
         inventorySendBtn.disabled = false;
         if (data.ok) {
-          var msg = "✅ Iikoga yozildi — Инвентаризация №" + data.documentNumber + " (" + items.length + " band).";
+          var msg = "✅ Iikoga yozildi — Инвентаризация №" + data.documentNumber + " (" + selectedInvDateDisplay() + ", " + items.length + " band).";
           if (data.missing && data.missing.length) {
             msg += " ⚠️ Topilmadi: " + data.missing.join(", ");
           }
@@ -2054,5 +2075,3 @@
   render("");
 })();
 </script>
-</body>
-</html>
