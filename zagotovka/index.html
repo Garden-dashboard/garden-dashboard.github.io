@@ -72,9 +72,6 @@
   }
 
   header {
-    position: sticky;
-    top: 0;
-    z-index: 10;
     background: var(--bg);
     padding: 18px 16px 12px;
     border-bottom: 1px solid var(--border);
@@ -150,30 +147,8 @@
      zayavkalarni sana bo'yicha ko'ra oladigan Arxiv paneli (barcha login/
      destinatsiyalar uchun, sof QO'SHIMCHA -- mavjud qidiruv/savat oqimiga
      hech qanday ta'sir qilmaydi). */
-  .header-top-row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 10px;
-  }
-  .archive-btn {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    padding: 9px 12px;
-    font-size: 12.5px;
-    font-weight: 700;
-    color: var(--text);
-    cursor: pointer;
-    box-shadow: var(--shadow);
-    margin-top: 1px;
-  }
-  .archive-btn:hover { border-color: var(--accent); }
-
+  /* 2026-09-27: "Arxiv" tugmasi chap panelga ko'chdi (.sb-item),
+     shuning uchun eski .header-top-row / .archive-btn qoidalari olib tashlandi. */
   .archive-overlay {
     position: fixed;
     inset: 0;
@@ -393,22 +368,25 @@
   }
   .archive-summary b { color: var(--text); }
 
+  /* 2026-09-27: chap panelli joylashuvda `main` va `.cart` endi ustunlar
+     ichida turadi -- eski "markazga tortish" (max-width + margin:auto)
+     olib tashlandi, ular ustun kengligini to'liq egallaydi. */
   main {
     flex: 1;
-    padding: 12px 16px 32px;
-    max-width: 640px;
     width: 100%;
-    margin: 0 auto;
+    padding: 12px 0 0;
   }
 
   .cart {
-    max-width: 640px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 12px 16px 0;
-    display: none;
+    width: 400px;
+    flex-shrink: 0;
+    align-self: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 14px 0;
+    display: block;
   }
-  .cart.has-items { display: block; }
 
   .cart-head {
     display: flex;
@@ -444,19 +422,9 @@
     color: var(--accent);
     white-space: nowrap;
   }
-  .cart-date-input {
-    flex: 1;
-    font-size: 16px;
-    font-family: inherit;
-    font-variant-numeric: tabular-nums;
-    padding: 8px 10px;
-    border-radius: 8px;
-    border: 1.5px solid var(--border);
-    background: var(--surface);
-    color: var(--text);
-  }
-  .cart-date-input:focus { outline: none; border-color: var(--accent); }
-
+  /* .cart-date-input olib tashlandi -- qabul qiluvchi tanlovi tepa qatorga
+     ko'chdi (.ctl-select). .cart-date-row/.cart-date-label hamon
+     Inventarizatsiya bo'limidagi sana tanlovi uchun ishlatiladi. */
   .date-toggle {
     flex: 1;
     display: flex;
@@ -809,32 +777,92 @@
   /* 2026-09-22: foydalanuvchi so'rovi bilan -- Горячий склад (Sawa/Suxrob)
      loginlari uchun "Inventarizatsiya" bo'limi. Faqat shu loginlar uchun
      ko'rinadi, "Zayavka" oqimiga hech qanday ta'sir qilmaydi. */
-  .mode-tabs {
-    display: none;
-    gap: 8px;
-    justify-content: flex-start;
-    padding: 0 16px 12px;
-  }
-  .mode-tabs.show { display: flex; }
-  .mode-tab {
-    flex: 0 0 auto;
-    text-align: center;
-    padding: 10px 18px;
-    border-radius: 10px;
-    border: 1.5px solid var(--border);
-    background: var(--surface-2);
-    color: var(--text-muted);
-    font-weight: 700;
-    font-size: 13px;
-    cursor: pointer;
-  }
-  .mode-tab.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  /* ---- 2026-09-27: "haqiqiy dastur" ko'rinishi -- chap panel (sidebar).
+     Namuna foydalanuvchi tomonidan tasdiqlangач joylandi. Barcha id'lar
+     va JS mantig'i o'zgarmagan, faqat joylashuv va uslub. Telefonda chap
+     panel PASTKI qatorga aylanadi (oshpazlar telefonda ishlaydi). ---- */
+  .app { display: flex; min-height: 100vh; align-items: stretch; }
 
-  body.mode-inventory .search-wrap,
-  body.mode-inventory .meta-row,
+  .sidebar {
+    width: 236px;
+    flex-shrink: 0;
+    background: #141a17;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0 16px;
+  }
+  .sb-brand {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 16px 18px; margin-bottom: 12px;
+    border-bottom: 1px solid #253029;
+  }
+  .sb-logo {
+    width: 34px; height: 34px; flex-shrink: 0; border-radius: 9px;
+    background: var(--accent); display: flex; align-items: center; justify-content: center;
+  }
+  .sb-brand-text { display: flex; flex-direction: column; min-width: 0; }
+  .sb-brand-name { color: #ffffff; font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
+  .sb-brand-sub { color: #8b9a90; font-size: 11.5px; margin-top: 1px; }
+
+  .sb-nav { display: flex; flex-direction: column; gap: 4px; padding: 0 10px; }
+  .sb-item {
+    display: flex; align-items: center; gap: 11px;
+    min-height: 46px; padding: 0 13px;
+    border: none; border-radius: 10px;
+    background: none; color: #b3c1b8;
+    font-family: inherit; font-size: 14px; font-weight: 500;
+    text-align: left; cursor: pointer;
+  }
+  .sb-ico { flex-shrink: 0; }
+  .sb-item:hover { background: #1e2a23; color: #ffffff; }
+  .sb-item.active { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+  .sb-item.active:hover { background: var(--accent); color: var(--accent-ink); }
+
+  .sb-user {
+    margin-top: auto; padding: 13px 16px 0;
+    border-top: 1px solid #253029;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sb-avatar {
+    width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%;
+    background: var(--accent-2); color: #ffffff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; text-transform: uppercase;
+  }
+  .sb-user-text { display: flex; flex-direction: column; min-width: 0; }
+  .sb-user-name { color: #ffffff; font-size: 13px; font-weight: 600; }
+  .sb-user-role { color: #8b9a90; font-size: 11px; }
+
+  .app-main { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; }
+
+  .topbar {
+    flex-shrink: 0;
+    padding: 16px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .topbar-text { flex-grow: 1; min-width: 180px; }
+  .topbar-text h1 { margin: 0; font-size: 21px; }
+  .topbar-controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .ctl-group { display: flex; align-items: center; gap: 8px; }
+  .ctl-label { font-size: 12.5px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+  .ctl-select {
+    min-height: 44px; min-width: 180px; padding: 0 10px;
+    font-size: 16px; font-family: inherit;
+    border-radius: 10px; border: 1.5px solid var(--border);
+    background: var(--surface); color: var(--text);
+  }
+  .ctl-select:focus { outline: none; border-color: var(--accent); }
+
+  .app-body { flex-grow: 1; min-height: 0; display: flex; gap: 18px; padding: 18px 20px 28px; }
+  .col-left { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; }
+
+  body.mode-inventory .col-left,
   body.mode-inventory .cart,
-  body.mode-inventory main { display: none !important; }
-  #inventorySection { display: none; max-width: 640px; margin: 0 auto; padding: 4px 16px 40px; }
+  body.mode-adminlist .col-left,
+  body.mode-adminlist .cart { display: none !important; }
+  #inventorySection { display: none; flex-grow: 1; min-width: 0; }
   body.mode-inventory #inventorySection { display: block; }
 
   .inv-sub { margin: 0 0 16px; font-size: 13px; color: var(--text-muted); line-height: 1.5; }
@@ -857,13 +885,51 @@
   /* 2026-09-27: FAQAT admin login uchun -- "Ro'yxat" bo'limi. Zayavka
      ro'yxatlariga iikodagi mahsulotni qo'shish/olib tashlash, ombor
      (manba) belgilash. Zayavka/Inventarizatsiya oqimlariga tegmaydi. */
-  body.mode-adminlist .search-wrap,
-  body.mode-adminlist .meta-row,
-  body.mode-adminlist .cart,
-  body.mode-adminlist #inventorySection,
-  body.mode-adminlist main { display: none !important; }
-  #adminListSection { display: none; max-width: 720px; margin: 0 auto; padding: 4px 16px 60px; }
+  body.mode-adminlist #inventorySection { display: none !important; }
+  #adminListSection { display: none; flex-grow: 1; min-width: 0; }
   body.mode-adminlist #adminListSection { display: block; }
+  .al-cols { display: flex; gap: 16px; align-items: flex-start; }
+  .al-col { flex: 1 1 0; min-width: 0; }
+
+  /* Katta ekranda chap panel va tepa qator joyida turadi, faqat ichki
+     qism aylanadi -- haqiqiy dastur hissi shundan. */
+  @media (min-width: 901px) {
+    .sidebar { position: sticky; top: 0; height: 100vh; }
+    .topbar { position: sticky; top: 0; z-index: 10; }
+    footer { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--border); }
+  }
+
+  /* ---- TELEFON: chap panel PASTKI qatorga aylanadi ---- */
+  @media (max-width: 900px) {
+    .app { flex-direction: column; }
+    .sidebar {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 120;
+      width: auto; height: auto;
+      flex-direction: row; gap: 4px;
+      padding: 7px 7px calc(7px + env(safe-area-inset-bottom, 0px));
+      border-top: 1px solid #253029;
+    }
+    .sb-brand, .sb-user { display: none; }
+    .sb-nav {
+      flex-direction: row; flex-grow: 1; gap: 4px; padding: 0;
+    }
+    .sb-item {
+      flex: 1 1 0; min-width: 0;
+      flex-direction: column; justify-content: center; gap: 3px;
+      min-height: 52px; padding: 0 4px;
+      font-size: 10.5px; font-weight: 600; text-align: center;
+    }
+    .sb-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+    .app-main { padding-bottom: 74px; }
+    .topbar { padding: 14px 16px; gap: 12px; }
+    .topbar-text h1 { font-size: 19px; }
+    .topbar-controls { width: 100%; flex-direction: column; align-items: stretch; gap: 9px; }
+    .ctl-group { justify-content: space-between; }
+    .ctl-select { flex-grow: 1; min-width: 0; }
+    .app-body { flex-direction: column; gap: 14px; padding: 14px 16px 20px; }
+    .cart { width: auto; align-self: stretch; }
+    .al-cols { flex-direction: column; }
+  }
 
   .al-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
   .al-label { font-size: 12.5px; font-weight: 700; color: var(--accent); white-space: nowrap; }
@@ -939,28 +1005,151 @@
   </div>
 </div>
 
-<header>
-  <div class="header-top-row">
-    <div>
-      <p class="eyebrow">Zagotovka &middot; Ombor kataloги</p>
-      <h1>Mahsulot nomini toping</h1>
-    </div>
-    <button class="archive-btn" id="archiveBtn" type="button">🗂 Arxiv</button>
-  </div>
-  <div class="search-wrap">
-    <input id="q" type="text" placeholder="Masalan: qusqavoy, gijduvon..." autocomplete="off" autocapitalize="off" spellcheck="false" />
-    <button id="clearBtn" aria-label="Tozalash">&times;</button>
-  </div>
-  <div class="meta-row">
-    <span id="countLabel">3000+ mahsulot</span>
-    <span id="statusLabel"></span>
-  </div>
-</header>
+<div class="app" id="app">
 
-<div class="mode-tabs" id="modeTabs">
-  <button class="mode-tab active" id="tabZayavkaBtn" type="button">📝 Zayavka</button>
-  <button class="mode-tab" id="tabInventoryBtn" type="button">📋 Inventarizatsiya</button>
-  <button class="mode-tab" id="tabAdminListBtn" type="button" style="display:none">⚙️ Ro'yxat</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <span class="sb-logo" aria-hidden="true">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"></path><path d="M3 12l9 4 9-4"></path><path d="M3 17l9 4 9-4"></path></svg>
+      </span>
+      <span class="sb-brand-text">
+        <span class="sb-brand-name">Olimp Zagotovka</span>
+        <span class="sb-brand-sub">Zayavka tizimi</span>
+      </span>
+    </div>
+
+    <nav class="sb-nav" id="modeTabs">
+      <button class="sb-item active" id="tabZayavkaBtn" type="button">
+        <svg class="sb-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6a1 1 0 011 1v1H8V4a1 1 0 011-1z"></path><path d="M16 5h2a1 1 0 011 1v14a1 1 0 01-1 1H6a1 1 0 01-1-1V6a1 1 0 011-1h2"></path><path d="M9 11h6M9 15h4"></path></svg>
+        <span>Zayavka</span>
+      </button>
+      <button class="sb-item" id="tabInventoryBtn" type="button">
+        <svg class="sb-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="6" rx="1"></rect><path d="M5 10v9a1 1 0 001 1h12a1 1 0 001-1v-9"></path><path d="M10 14h4"></path></svg>
+        <span>Inventarizatsiya</span>
+      </button>
+      <button class="sb-item" id="tabAdminListBtn" type="button" style="display:none">
+        <svg class="sb-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M4 12h16M4 18h7"></path><circle cx="18" cy="6" r="2"></circle><circle cx="15" cy="18" r="2"></circle></svg>
+        <span>Ro'yxat</span>
+      </button>
+      <button class="sb-item" id="archiveBtn" type="button">
+        <svg class="sb-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"></rect><path d="M5 8v11a1 1 0 001 1h12a1 1 0 001-1V8"></path><path d="M10 12h4"></path></svg>
+        <span>Arxiv</span>
+      </button>
+    </nav>
+
+    <div class="sb-user">
+      <span class="sb-avatar" id="sbAvatar">&middot;</span>
+      <span class="sb-user-text">
+        <span class="sb-user-name" id="sbLogin">&nbsp;</span>
+        <span class="sb-user-role" id="sbRole">&nbsp;</span>
+      </span>
+    </div>
+  </aside>
+
+  <div class="app-main">
+
+    <header class="topbar">
+      <div class="topbar-text">
+        <p class="eyebrow" id="pageEyebrow">Zagotovka &middot; Ombor katalogi</p>
+        <h1 id="pageTitle">Mahsulot nomini toping</h1>
+      </div>
+      <div class="topbar-controls" id="topbarControls">
+        <div class="ctl-group">
+          <label class="ctl-label" for="cartDestSelect">🏢 Qabul qiluvchi</label>
+          <select class="ctl-select" id="cartDestSelect"></select>
+        </div>
+        <div class="ctl-group">
+          <span class="ctl-label">📅 Sana</span>
+          <div class="date-toggle" id="dateToggle">
+            <button type="button" class="date-toggle-btn active" data-day="0">Bugun</button>
+            <button type="button" class="date-toggle-btn" data-day="1">Ertaga</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="app-body">
+
+      <section class="col-left" id="colLeft">
+        <div class="search-wrap">
+          <input id="q" type="text" placeholder="Masalan: qusqavoy, gijduvon..." autocomplete="off" autocapitalize="off" spellcheck="false" />
+          <button id="clearBtn" aria-label="Tozalash">&times;</button>
+        </div>
+        <div class="meta-row">
+          <span id="countLabel">3000+ mahsulot</span>
+          <span id="statusLabel"></span>
+        </div>
+
+        <main>
+          <div id="idleState" class="idle">
+            <p>Lotincha, xato yoki qisqartma yozsangiz ham — katalogdagi <strong>to'g'ri nom</strong>ni topamiz. Natijaga bosing — ro'yxatga qo'shiladi, soni yozing, oxirida <strong>"Guruhga yuborish"</strong> bilan Telegram'da to'g'ridan-to'g'ri yuborasiz.</p>
+            <div class="hint-examples" id="hintExamples"></div>
+          </div>
+          <ul id="results"></ul>
+        </main>
+
+        <footer>
+          <p class="qr-title">📱 Bu sahifaga tez kirish uchun QR kod</p>
+          <img src="qr.png" alt="Zayavka Qidiruv QR kodi" class="qr-img" width="120" height="120" />
+          <p class="qr-hint">Telefon kamerasi bilan skanerlang — shu sahifa (Zayavka Qidiruv) ochiladi.<br>Boshqa xodimlarga ulashish uchun shu rasmni yuborishingiz yoki ekrandan skanerlatishingiz mumkin.</p>
+          <p>Olimp Zagotovka &middot; mahalliy katalog, internetga bog'liq emas</p>
+        </footer>
+      </section>
+
+      <aside class="cart" id="cart">
+        <div class="cart-head">
+          <span class="cart-title" id="cartTitle">Tanlangan (0)</span>
+          <button class="cart-clear" id="cartClearBtn" type="button">Hammasini tozalash</button>
+        </div>
+        <ul id="cartList"></ul>
+        <div class="cart-actions">
+          <button class="cart-send-btn" id="cartSendBtn" type="button">Guruhga yuborish</button>
+          <button class="cart-copy-btn" id="cartCopyBtn" type="button">Nusxalash</button>
+        </div>
+      </aside>
+
+      <section id="inventorySection">
+        <p class="inv-sub">Har mahsulot yoniga omborda hozir haqiqatda bor miqdorni yozing. Bo'sh qoldirilgan bandlar yuborilmaydi.</p>
+        <div class="cart-date-row">
+          <label class="cart-date-label">📅 Sana</label>
+          <div class="date-toggle" id="invDateToggle">
+            <button type="button" class="date-toggle-btn active" data-day="0">Bugun</button>
+            <button type="button" class="date-toggle-btn" data-day="1">Ertaga</button>
+          </div>
+        </div>
+        <ul id="inventoryList"></ul>
+        <div class="cart-actions">
+          <button class="cart-send-btn" id="inventorySendBtn" type="button">Yuborish</button>
+        </div>
+        <p class="inv-result" id="inventoryResult"></p>
+      </section>
+
+      <section id="adminListSection">
+        <p class="al-hint">Qabul qiluvchini tanlang → joriy ro'yxatni ko'ring → iikodagi mahsulotni qidirib qo'shing yoki keraksizini <b>×</b> bilan olib tashlang. Oxirida <b>Saqlash</b>ni bosing — o'zgarish darhol barcha xodimlarda ko'rinadi.</p>
+
+        <div class="al-row">
+          <label class="al-label" for="alDestSelect">🏢 Qabul qiluvchi</label>
+          <select class="al-select" id="alDestSelect"></select>
+        </div>
+
+        <div class="al-cols">
+          <div class="al-col">
+            <p class="al-section-title" id="alCurrentTitle">Joriy ro'yxat</p>
+            <ul class="al-list" id="alCurrentList"></ul>
+          </div>
+          <div class="al-col">
+            <p class="al-section-title">iikodan qo'shish</p>
+            <input class="al-search" id="alSearchInput" type="text" placeholder="Mahsulot nomini yozing (lotincha ham bo'ladi)..." autocomplete="off" autocapitalize="off" spellcheck="false" />
+            <ul class="al-list" id="alSearchResults" style="margin-top:8px"></ul>
+          </div>
+        </div>
+
+        <button class="al-save" id="alSaveBtn" type="button" disabled>💾 Saqlash</button>
+        <p class="al-status" id="alStatus"></p>
+      </section>
+
+    </div>
+  </div>
 </div>
 
 <div class="archive-overlay" id="archiveOverlay">
@@ -988,83 +1177,6 @@
     <div class="archive-summary" id="archiveSummary"></div>
   </div>
 </div>
-
-<div class="cart" id="cart">
-  <div class="cart-head">
-    <span class="cart-title" id="cartTitle">Tanlangan (0)</span>
-    <button class="cart-clear" id="cartClearBtn" type="button">Hammasini tozalash</button>
-  </div>
-  <div class="cart-date-row">
-    <label class="cart-date-label" for="cartDestSelect">🏢 Qabul qiluvchi</label>
-    <select class="cart-date-input" id="cartDestSelect"></select>
-  </div>
-  <div class="cart-date-row">
-    <label class="cart-date-label">📅 Sana</label>
-    <div class="date-toggle" id="dateToggle">
-      <button type="button" class="date-toggle-btn active" data-day="0">Bugun</button>
-      <button type="button" class="date-toggle-btn" data-day="1">Ertaga</button>
-    </div>
-  </div>
-  <ul id="cartList"></ul>
-  <div class="cart-actions">
-    <button class="cart-send-btn" id="cartSendBtn" type="button">Guruhga yuborish</button>
-    <button class="cart-copy-btn" id="cartCopyBtn" type="button">Nusxalash</button>
-  </div>
-</div>
-
-<main>
-  <div id="idleState" class="idle">
-    <p>Lotincha, xato yoki qisqartma yozsangiz ham — katalogdagi <strong>to'g'ri nom</strong>ni topamiz. Natijaga bosing — ro'yxatga qo'shiladi, soni yozing, oxirida <strong>"Guruhga yuborish"</strong> bilan Telegram'da to'g'ridan-to'g'ri yuborasiz.</p>
-    <div class="hint-examples" id="hintExamples"></div>
-  </div>
-  <ul id="results"></ul>
-</main>
-
-<section id="inventorySection">
-  <p class="eyebrow">Zagotovka · Inventarizatsiya</p>
-  <h1>Haqiqiy qoldiqni kiriting</h1>
-  <p class="inv-sub">Har mahsulot yoniga omborda hozir haqiqatda bor miqdorni yozing. Bo'sh qoldirilgan bandlar yuborilmaydi.</p>
-  <div class="cart-date-row">
-    <label class="cart-date-label">📅 Sana</label>
-    <div class="date-toggle" id="invDateToggle">
-      <button type="button" class="date-toggle-btn active" data-day="0">Bugun</button>
-      <button type="button" class="date-toggle-btn" data-day="1">Ertaga</button>
-    </div>
-  </div>
-  <ul id="inventoryList"></ul>
-  <div class="cart-actions">
-    <button class="cart-send-btn" id="inventorySendBtn" type="button">Yuborish</button>
-  </div>
-  <p class="inv-result" id="inventoryResult"></p>
-</section>
-
-<section id="adminListSection">
-  <p class="eyebrow">Admin · Zayavka ro'yxati</p>
-  <h1>Ro'yxatga mahsulot qo'shish</h1>
-  <p class="al-hint">Qabul qiluvchini tanlang → joriy ro'yxatni ko'ring → iikodagi mahsulotni qidirib qo'shing yoki keraksizini <b>×</b> bilan olib tashlang. Oxirida <b>Saqlash</b>ni bosing — o'zgarish darhol barcha xodimlarda ko'rinadi.</p>
-
-  <div class="al-row">
-    <label class="al-label" for="alDestSelect">🏢 Qabul qiluvchi</label>
-    <select class="al-select" id="alDestSelect"></select>
-  </div>
-
-  <p class="al-section-title" id="alCurrentTitle">Joriy ro'yxat</p>
-  <ul class="al-list" id="alCurrentList"></ul>
-
-  <p class="al-section-title">iikodan qo'shish</p>
-  <input class="al-search" id="alSearchInput" type="text" placeholder="Mahsulot nomini yozing (lotincha ham bo'ladi)..." autocomplete="off" autocapitalize="off" spellcheck="false" />
-  <ul class="al-list" id="alSearchResults" style="margin-top:8px"></ul>
-
-  <button class="al-save" id="alSaveBtn" type="button" disabled>💾 Saqlash</button>
-  <p class="al-status" id="alStatus"></p>
-</section>
-
-<footer>
-  <p class="qr-title">📱 Bu sahifaga tez kirish uchun QR kod</p>
-  <img src="qr.png" alt="Zayavka Qidiruv QR kodi" class="qr-img" width="120" height="120" />
-  <p class="qr-hint">Telefon kamerasi bilan skanerlang — shu sahifa (Zayavka Qidiruv) ochiladi.<br>Boshqa xodimlarga ulashish uchun shu rasmni yuborishingiz yoki ekrandan skanerlatishingiz mumkin.</p>
-  <p>Olimp Zagotovka &middot; mahalliy katalog, internetga bog'liq emas</p>
-</footer>
 
 <div id="toast"></div>
 
@@ -1150,6 +1262,22 @@
       lockError.textContent = "";
     });
 
+  // 2026-09-27: chap panel pastida kim kirgani ko'rinadi (haqiqiy dastur kabi).
+  function fillSidebarUser(login, role) {
+    var av = document.getElementById("sbAvatar");
+    var nm = document.getElementById("sbLogin");
+    var rl = document.getElementById("sbRole");
+    if (av) av.textContent = (login || "?").charAt(0);
+    if (nm) nm.textContent = login || "";
+    if (rl) {
+      var sub = "";
+      if (role && role.admin) sub = "Admin";
+      else if (role && role.dest) sub = role.dest.replace(role.org + ": ", "");
+      else if (role && role.org) sub = role.org;
+      rl.textContent = sub;
+    }
+  }
+
   function populateDestOptions() {
     var role = ROLES[siteAuth.login];
     var org = role ? role.org : "";
@@ -1220,13 +1348,11 @@
       populateDestOptions();
       prefillChecklist(cartDestSelect.value);
       setMode("zayavka");
-      // Tab qatori faqat qo'shimcha huquqi bor loginlarda ko'rinadi:
-      // Инвентаризация -- Горячий склад loginlari, "⚙️ Ro'yxat" -- admin.
-      var canInv = hasInventoryAccess();
-      var canAdmin = hasAdminAccess();
-      document.getElementById("tabInventoryBtn").style.display = canInv ? "" : "none";
-      document.getElementById("tabAdminListBtn").style.display = canAdmin ? "" : "none";
-      modeTabs.classList.toggle("show", canInv || canAdmin);
+      // Chap paneldagi bo'limlar faqat huquqi bor loginlarda ko'rinadi:
+      // Инвентаризация -- Горячий склад loginlari, "Ro'yxat" -- admin.
+      document.getElementById("tabInventoryBtn").style.display = hasInventoryAccess() ? "" : "none";
+      document.getElementById("tabAdminListBtn").style.display = hasAdminAccess() ? "" : "none";
+      fillSidebarUser(login, role);
       fetch(SEND_ENDPOINT + "/admin/map")
         .then(function (r) { return r.json(); })
         .then(function (data) { if (data.ok) productSourceMap = data.map || {}; })
@@ -2103,6 +2229,15 @@
     return !!(role && role.dest === GORACHIY_DEST);
   }
 
+  // 2026-09-27: chap panelli joylashuvda tepa qator sarlavhasi ham rejimga
+  // qarab o'zgaradi (avval har bo'limning o'z sarlavhasi bor edi -- endi
+  // bitta joyda, haqiqiy dasturlardagi kabi).
+  var MODE_TITLES = {
+    zayavka: ["Zagotovka · Ombor katalogi", "Mahsulot nomini toping"],
+    inventory: ["Zagotovka · Inventarizatsiya", "Haqiqiy qoldiqni kiriting"],
+    adminlist: ["Admin · Zayavka ro'yxati", "Ro'yxatga mahsulot qo'shish"],
+  };
+
   function setMode(mode) {
     document.body.classList.toggle("mode-inventory", mode === "inventory");
     document.body.classList.toggle("mode-adminlist", mode === "adminlist");
@@ -2110,6 +2245,16 @@
     tabInventoryBtn.classList.toggle("active", mode === "inventory");
     var alBtn = document.getElementById("tabAdminListBtn");
     if (alBtn) alBtn.classList.toggle("active", mode === "adminlist");
+
+    var t = MODE_TITLES[mode] || MODE_TITLES.zayavka;
+    var eyebrowEl = document.getElementById("pageEyebrow");
+    var titleEl = document.getElementById("pageTitle");
+    if (eyebrowEl) eyebrowEl.textContent = t[0];
+    if (titleEl) titleEl.textContent = t[1];
+    // Qabul qiluvchi/sana tanlovi FAQAT zayavka rejimida kerak --
+    // inventarizatsiya va ro'yxat bo'limlarining o'z tanlovlari bor.
+    var ctls = document.getElementById("topbarControls");
+    if (ctls) ctls.style.display = mode === "zayavka" ? "" : "none";
   }
 
   var inventoryLoaded = false;
