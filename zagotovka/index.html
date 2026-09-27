@@ -853,6 +853,69 @@
   .inv-qty:focus { outline: none; border-color: var(--accent); }
   .inv-unit { font-size: 11px; color: var(--text-muted); flex-shrink: 0; min-width: 22px; }
   .inv-result { font-size: 13px; color: var(--accent-2); min-height: 18px; margin: 8px 2px 0; }
+
+  /* 2026-09-27: FAQAT admin login uchun -- "Ro'yxat" bo'limi. Zayavka
+     ro'yxatlariga iikodagi mahsulotni qo'shish/olib tashlash, ombor
+     (manba) belgilash. Zayavka/Inventarizatsiya oqimlariga tegmaydi. */
+  body.mode-adminlist .search-wrap,
+  body.mode-adminlist .meta-row,
+  body.mode-adminlist .cart,
+  body.mode-adminlist #inventorySection,
+  body.mode-adminlist main { display: none !important; }
+  #adminListSection { display: none; max-width: 720px; margin: 0 auto; padding: 4px 16px 60px; }
+  body.mode-adminlist #adminListSection { display: block; }
+
+  .al-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .al-label { font-size: 12.5px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+  .al-select {
+    flex: 1; min-width: 200px; font-size: 16px; font-family: inherit;
+    padding: 9px 10px; border-radius: 8px; border: 1.5px solid var(--border);
+    background: var(--surface); color: var(--text);
+  }
+  .al-select:focus { outline: none; border-color: var(--accent); }
+  .al-search {
+    width: 100%; font-size: 16px; font-family: inherit;
+    padding: 12px 14px; border-radius: 10px; border: 1.5px solid var(--border);
+    background: var(--surface); color: var(--text); box-shadow: var(--shadow);
+  }
+  .al-search:focus { outline: none; border-color: var(--accent); }
+  .al-section-title {
+    font-size: 11.5px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--text-muted); margin: 18px 0 8px;
+  }
+  ul.al-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+  li.al-item {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 9px; padding: 8px 10px 8px 12px;
+  }
+  li.al-item.al-new { border-color: var(--accent-2); background: color-mix(in srgb, var(--accent-2) 10%, var(--surface-2)); }
+  .al-name { flex: 1; font-size: 13.5px; line-height: 1.35; }
+  .al-unit { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
+  .al-src { font-size: 10.5px; color: var(--text-muted); flex-shrink: 0; max-width: 130px; text-align: right; }
+  .al-src.al-missing { color: var(--accent); font-weight: 700; }
+  .al-btn {
+    flex-shrink: 0; border: none; border-radius: 7px; cursor: pointer;
+    font-family: inherit; font-size: 12px; font-weight: 700; padding: 7px 11px;
+  }
+  .al-add { background: var(--accent-2); color: #fff; }
+  .al-del { background: none; color: var(--text-muted); font-size: 20px; line-height: 1; padding: 2px 8px; }
+  .al-srcpick { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+  .al-srcpick button {
+    border: 1.5px solid var(--border); background: var(--surface); color: var(--text);
+    border-radius: 7px; padding: 6px 9px; font-size: 11.5px; font-family: inherit; cursor: pointer;
+  }
+  .al-srcpick button:hover { border-color: var(--accent); }
+  .al-hint { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin: 0 0 14px; }
+  .al-status { font-size: 13px; min-height: 20px; margin: 12px 2px 0; color: var(--accent-2); }
+  .al-status.al-err { color: var(--accent); }
+  .al-save {
+    width: 100%; margin-top: 16px; padding: 14px; border: none; border-radius: 12px;
+    background: var(--accent); color: var(--accent-ink);
+    font-size: 15px; font-weight: 800; font-family: inherit; cursor: pointer;
+  }
+  .al-save:disabled { opacity: 0.55; cursor: default; }
+  .al-dirty { color: var(--accent); font-weight: 700; }
 </style>
 </head>
 <body>
@@ -897,6 +960,7 @@
 <div class="mode-tabs" id="modeTabs">
   <button class="mode-tab active" id="tabZayavkaBtn" type="button">📝 Zayavka</button>
   <button class="mode-tab" id="tabInventoryBtn" type="button">📋 Inventarizatsiya</button>
+  <button class="mode-tab" id="tabAdminListBtn" type="button" style="display:none">⚙️ Ro'yxat</button>
 </div>
 
 <div class="archive-overlay" id="archiveOverlay">
@@ -972,6 +1036,27 @@
     <button class="cart-send-btn" id="inventorySendBtn" type="button">Yuborish</button>
   </div>
   <p class="inv-result" id="inventoryResult"></p>
+</section>
+
+<section id="adminListSection">
+  <p class="eyebrow">Admin · Zayavka ro'yxati</p>
+  <h1>Ro'yxatga mahsulot qo'shish</h1>
+  <p class="al-hint">Qabul qiluvchini tanlang → joriy ro'yxatni ko'ring → iikodagi mahsulotni qidirib qo'shing yoki keraksizini <b>×</b> bilan olib tashlang. Oxirida <b>Saqlash</b>ni bosing — o'zgarish darhol barcha xodimlarda ko'rinadi.</p>
+
+  <div class="al-row">
+    <label class="al-label" for="alDestSelect">🏢 Qabul qiluvchi</label>
+    <select class="al-select" id="alDestSelect"></select>
+  </div>
+
+  <p class="al-section-title" id="alCurrentTitle">Joriy ro'yxat</p>
+  <ul class="al-list" id="alCurrentList"></ul>
+
+  <p class="al-section-title">iikodan qo'shish</p>
+  <input class="al-search" id="alSearchInput" type="text" placeholder="Mahsulot nomini yozing (lotincha ham bo'ladi)..." autocomplete="off" autocapitalize="off" spellcheck="false" />
+  <ul class="al-list" id="alSearchResults" style="margin-top:8px"></ul>
+
+  <button class="al-save" id="alSaveBtn" type="button" disabled>💾 Saqlash</button>
+  <p class="al-status" id="alStatus"></p>
 </section>
 
 <footer>
@@ -1135,7 +1220,13 @@
       populateDestOptions();
       prefillChecklist(cartDestSelect.value);
       setMode("zayavka");
-      modeTabs.classList.toggle("show", hasInventoryAccess());
+      // Tab qatori faqat qo'shimcha huquqi bor loginlarda ko'rinadi:
+      // Инвентаризация -- Горячий склад loginlari, "⚙️ Ro'yxat" -- admin.
+      var canInv = hasInventoryAccess();
+      var canAdmin = hasAdminAccess();
+      document.getElementById("tabInventoryBtn").style.display = canInv ? "" : "none";
+      document.getElementById("tabAdminListBtn").style.display = canAdmin ? "" : "none";
+      modeTabs.classList.toggle("show", canInv || canAdmin);
       fetch(SEND_ENDPOINT + "/admin/map")
         .then(function (r) { return r.json(); })
         .then(function (data) { if (data.ok) productSourceMap = data.map || {}; })
@@ -1190,6 +1281,56 @@
   var GORACHIY_NAMES = (DEST_CHECKLISTS[GORACHIY_DEST] || []).map(function (it) { return it.name; });
   var GORACHIY_INDEX = buildIndex(GORACHIY_NAMES);
   var GORACHIY_TOKEN_INDEX = buildTokenIndex(GORACHIY_INDEX);
+
+  // 2026-09-27: ro'yxatlar endi admin tomonidan sayt ichidan tahrirlanadi.
+  // Statik (yuqoridagi, index.html ichiga o'rnatilgan) ro'yxat -- ASOS/ZAXIRA;
+  // serverda (KV) saqlangan o'zgartirish bo'lsa, shu ASOS USTIGA qo'yiladi.
+  // Worker ishlamasa yoki internet bo'lmasa -- sayt eski ro'yxat bilan
+  // muammosiz ishlayveradi (ataylab shunday qilingan).
+  function rebuildCatalogIndexes() {
+    GLOBAL_INDEX = buildIndex(RAW_NAMES);
+    GLOBAL_TOKEN_INDEX = buildTokenIndex(GLOBAL_INDEX);
+    GORACHIY_NAMES = (DEST_CHECKLISTS[GORACHIY_DEST] || []).map(function (it) { return it.name; });
+    GORACHIY_INDEX = buildIndex(GORACHIY_NAMES);
+    GORACHIY_TOKEN_INDEX = buildTokenIndex(GORACHIY_INDEX);
+  }
+
+  function applyChecklistOverrides(data) {
+    if (!data || !data.ok) return;
+    var checklists = data.checklists || {};
+    var changed = false;
+    Object.keys(checklists).forEach(function (dest) {
+      if (!Array.isArray(checklists[dest])) return;
+      DEST_CHECKLISTS[dest] = checklists[dest];
+      changed = true;
+    });
+    var units = data.units || {};
+    Object.keys(units).forEach(function (n) { GLOBAL_UNITS[n] = units[n]; });
+    // Yangi qo'shilgan nomlar qidiruvda ham topilsin -- global katalogga qo'shamiz.
+    var known = {};
+    RAW_NAMES.forEach(function (n) { known[n] = true; });
+    Object.keys(checklists).forEach(function (dest) {
+      (checklists[dest] || []).forEach(function (it) {
+        if (it && it.name && !known[it.name]) {
+          known[it.name] = true;
+          RAW_NAMES.push(it.name);
+          changed = true;
+        }
+      });
+    });
+    if (!changed) return;
+    rebuildCatalogIndexes();
+    updateCountLabel();
+    // Allaqachon login qilingan bo'lsa, ro'yxat darhol yangilanadi.
+    if (siteAuth.login && cartDestSelect && cartDestSelect.value) {
+      prefillChecklist(cartDestSelect.value);
+    }
+  }
+
+  fetch(SEND_ENDPOINT + "/checklist/live")
+    .then(function (r) { return r.json(); })
+    .then(applyChecklistOverrides)
+    .catch(function () {});
 
   function activeCatalog() {
     if (cartDestSelect && cartDestSelect.value === GORACHIY_DEST) {
@@ -1248,14 +1389,17 @@
   var CYRILLIC_RE = /[Ѐ-ӿ]/;
   var LATIN_RE = /[a-z]/;
 
-  function search(rawQuery, limit) {
+  // 2026-09-27: 3-parametr `catalogOverride` qo'shildi -- admin "Ro'yxat"
+  // bo'limi iikoning JONLI katalogi ustidan xuddi shu qidiruv mantig'idan
+  // (lotin->kirill, xatoga chidamli) foydalanadi. Berilmasa -- eski xatti-harakat.
+  function search(rawQuery, limit, catalogOverride) {
     var q = rawQuery.trim().toLowerCase();
     if (q.length < 2) return [];
     if (LATIN_RE.test(q) && !CYRILLIC_RE.test(q)) {
       q = toCyrillicPhonetic(q);
     }
 
-    var active = activeCatalog();
+    var active = catalogOverride || activeCatalog();
     var PRODUCT_INDEX = active.index;
     var TOKEN_INDEX = active.tokenIndex;
 
@@ -1961,8 +2105,11 @@
 
   function setMode(mode) {
     document.body.classList.toggle("mode-inventory", mode === "inventory");
-    tabZayavkaBtn.classList.toggle("active", mode !== "inventory");
+    document.body.classList.toggle("mode-adminlist", mode === "adminlist");
+    tabZayavkaBtn.classList.toggle("active", mode === "zayavka");
     tabInventoryBtn.classList.toggle("active", mode === "inventory");
+    var alBtn = document.getElementById("tabAdminListBtn");
+    if (alBtn) alBtn.classList.toggle("active", mode === "adminlist");
   }
 
   var inventoryLoaded = false;
@@ -2077,6 +2224,308 @@
         inventorySendBtn.disabled = false;
         inventoryResult.textContent = "Internet aloqasi bilan muammo. Qayta urinib ko'ring.";
       });
+  });
+
+  // ---- 2026-09-27: Admin "⚙️ Ro'yxat" bo'limi (FAQAT admin login uchun) ----
+  // Zayavka ro'yxatlariga iikodagi mahsulotni qo'shish / olib tashlash /
+  // ombor (manba) belgilash. Xodimlar loginlarida bu bo'lim UMUMAN ko'rinmaydi.
+  var tabAdminListBtn = document.getElementById("tabAdminListBtn");
+  var alDestSelect = document.getElementById("alDestSelect");
+  var alCurrentList = document.getElementById("alCurrentList");
+  var alCurrentTitle = document.getElementById("alCurrentTitle");
+  var alSearchInput = document.getElementById("alSearchInput");
+  var alSearchResults = document.getElementById("alSearchResults");
+  var alSaveBtn = document.getElementById("alSaveBtn");
+  var alStatus = document.getElementById("alStatus");
+
+  var adminCatalog = null;      // {names, index, tokenIndex} -- iikoning jonli katalogi
+  var adminUnitByName = {};     // nom -> o'lchov birligi (iikodan)
+  var adminSourceMap = {};      // nom -> manba ombor (serverdagi joriy holat)
+  var adminSources = [];        // 7 ta zagotovka manbasi
+  var adminCatalogLoaded = false;
+  var alWorkingList = [];       // shu dest uchun tahrirlanayotgan ro'yxat [{name, unit}]
+  var alNewSources = {};        // shu seansda belgilangan yangi manbalar {nom: manba}
+  var alDirty = false;
+
+  function hasAdminAccess() {
+    var role = ROLES[siteAuth.login];
+    return !!(role && role.admin === true);
+  }
+
+  function allDestsList() {
+    var all = {};
+    Object.keys(ROUTES).forEach(function (src) {
+      ROUTES[src].forEach(function (d) { all[d] = true; });
+    });
+    return Object.keys(all).sort();
+  }
+
+  function alSetStatus(msg, isErr) {
+    alStatus.textContent = msg || "";
+    alStatus.classList.toggle("al-err", !!isErr);
+  }
+
+  function alMarkDirty(dirty) {
+    alDirty = dirty;
+    alSaveBtn.disabled = !dirty;
+    alSaveBtn.textContent = dirty ? "💾 Saqlash (o'zgarish bor)" : "💾 Saqlash";
+  }
+
+  function alSourceOf(name) {
+    return alNewSources[name] || adminSourceMap[name] || "";
+  }
+
+  function alRenderCurrent() {
+    var dest = alDestSelect.value;
+    alCurrentTitle.innerHTML = "Joriy ro'yxat — <b>" + alWorkingList.length + " ta</b>" +
+      (dest === GORACHIY_DEST ? " <span class=\"al-src al-missing\">(Горячий: bu ro'yxat qidiruv doirasi ham)</span>" : "");
+    alCurrentList.innerHTML = "";
+    if (alWorkingList.length === 0) {
+      var empty = document.createElement("li");
+      empty.className = "al-item";
+      empty.innerHTML = "<span class=\"al-name\" style=\"color:var(--text-muted)\">Ro'yxat bo'sh</span>";
+      alCurrentList.appendChild(empty);
+      return;
+    }
+    alWorkingList.forEach(function (it, idx) {
+      var li = document.createElement("li");
+      li.className = "al-item";
+
+      var nameSpan = document.createElement("span");
+      nameSpan.className = "al-name";
+      nameSpan.textContent = (idx + 1) + ". " + it.name;
+
+      var unitSpan = document.createElement("span");
+      unitSpan.className = "al-unit";
+      unitSpan.textContent = it.unit || "";
+
+      var srcSpan = document.createElement("span");
+      var src = alSourceOf(it.name);
+      srcSpan.className = "al-src" + (src ? "" : " al-missing");
+      srcSpan.textContent = src ? src.replace(" ЗАГАТОВКА", "").replace(" ЗАГАТОВОКА", "") : "❓ ombor yo'q";
+
+      var delBtn = document.createElement("button");
+      delBtn.className = "al-btn al-del";
+      delBtn.type = "button";
+      delBtn.title = "Ro'yxatdan olib tashlash";
+      delBtn.textContent = "×";
+      delBtn.addEventListener("click", function () {
+        alWorkingList.splice(idx, 1);
+        alMarkDirty(true);
+        alRenderCurrent();
+        alSetStatus("Olib tashlandi — saqlash uchun \"Saqlash\"ni bosing");
+      });
+
+      li.appendChild(nameSpan);
+      li.appendChild(unitSpan);
+      li.appendChild(srcSpan);
+      li.appendChild(delBtn);
+      alCurrentList.appendChild(li);
+    });
+  }
+
+  function alAddProduct(name, unit, source) {
+    for (var i = 0; i < alWorkingList.length; i++) {
+      if (alWorkingList[i].name === name) {
+        alSetStatus("\"" + name + "\" ro'yxatda allaqachon bor", true);
+        return;
+      }
+    }
+    if (source) alNewSources[name] = source;
+    alWorkingList.push({ name: name, unit: unit || "" });
+    alMarkDirty(true);
+    alRenderCurrent();
+    alSearchInput.value = "";
+    alRenderSearch("");
+    alSetStatus("✅ \"" + name + "\" qo'shildi — saqlash uchun \"Saqlash\"ni bosing");
+  }
+
+  function alShowSourcePicker(li, name, unit) {
+    if (li.querySelector(".al-srcpick")) return;
+    var pick = document.createElement("div");
+    pick.className = "al-srcpick";
+    pick.style.flexBasis = "100%";
+    var hint = document.createElement("div");
+    hint.style.cssText = "flex-basis:100%;font-size:11.5px;color:var(--accent);font-weight:700;margin-bottom:2px";
+    hint.textContent = "Bu mahsulot qaysi zagotovka omboridan keladi?";
+    pick.appendChild(hint);
+    adminSources.forEach(function (src) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = src.replace(" ЗАГАТОВКА", "").replace(" ЗАГАТОВОКА", "");
+      b.addEventListener("click", function () { alAddProduct(name, unit, src); });
+      pick.appendChild(b);
+    });
+    li.style.flexWrap = "wrap";
+    li.appendChild(pick);
+  }
+
+  function alRenderSearch(q) {
+    alSearchResults.innerHTML = "";
+    if (!adminCatalog) return;
+    var trimmed = (q || "").trim();
+    if (trimmed.length < 2) return;
+    var matches = search(trimmed, 25, adminCatalog);
+    if (matches.length === 0) {
+      var none = document.createElement("li");
+      none.className = "al-item";
+      none.innerHTML = "<span class=\"al-name\" style=\"color:var(--text-muted)\">Hech narsa topilmadi</span>";
+      alSearchResults.appendChild(none);
+      return;
+    }
+    matches.forEach(function (name) {
+      var li = document.createElement("li");
+      li.className = "al-item al-new";
+
+      var nameSpan = document.createElement("span");
+      nameSpan.className = "al-name";
+      nameSpan.textContent = name;
+
+      var unit = adminUnitByName[name] || "";
+      var unitSpan = document.createElement("span");
+      unitSpan.className = "al-unit";
+      unitSpan.textContent = unit;
+
+      var src = alSourceOf(name);
+      var srcSpan = document.createElement("span");
+      srcSpan.className = "al-src" + (src ? "" : " al-missing");
+      srcSpan.textContent = src ? src.replace(" ЗАГАТОВКА", "").replace(" ЗАГАТОВОКА", "") : "ombor belgilanmagan";
+
+      var addBtn = document.createElement("button");
+      addBtn.className = "al-btn al-add";
+      addBtn.type = "button";
+      addBtn.textContent = "+ Qo'shish";
+      addBtn.addEventListener("click", function () {
+        if (alSourceOf(name)) {
+          alAddProduct(name, unit, null);
+        } else {
+          // Ombor (manba) belgilanmagan bo'lsa -- накладnoy yaratilmaydi,
+          // shuning uchun darhol shu yerda so'raymiz.
+          alShowSourcePicker(li, name, unit);
+        }
+      });
+
+      li.appendChild(nameSpan);
+      li.appendChild(unitSpan);
+      li.appendChild(srcSpan);
+      li.appendChild(addBtn);
+      alSearchResults.appendChild(li);
+    });
+  }
+
+  function alLoadDest(dest) {
+    var base = DEST_CHECKLISTS[dest] || [];
+    alWorkingList = base.map(function (it) { return { name: it.name, unit: it.unit || GLOBAL_UNITS[it.name] || "" }; });
+    alNewSources = {};
+    alMarkDirty(false);
+    alSetStatus("");
+    alSearchInput.value = "";
+    alRenderSearch("");
+    alRenderCurrent();
+  }
+
+  function loadAdminCatalog() {
+    if (adminCatalogLoaded) return;
+    alSetStatus("iiko katalogi yuklanmoqda...");
+    fetch(SEND_ENDPOINT + "/admin/catalog-full", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ login: siteAuth.login, pass: siteAuth.pass }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data.ok) {
+          alSetStatus("Xato: " + (data.error || "noma'lum"), true);
+          return;
+        }
+        adminCatalogLoaded = true;
+        adminSources = data.sources || [];
+        adminSourceMap = data.sourceMap || {};
+        var names = [];
+        (data.products || []).forEach(function (p) {
+          names.push(p.name);
+          adminUnitByName[p.name] = p.unit || "";
+        });
+        var idx = buildIndex(names);
+        adminCatalog = { names: names, index: idx, tokenIndex: buildTokenIndex(idx) };
+        alSetStatus("iikodan " + names.length + " ta mahsulot yuklandi — qidirib qo'shishingiz mumkin");
+      })
+      .catch(function () {
+        alSetStatus("Internet aloqasi bilan muammo. Qayta urinib ko'ring.", true);
+      });
+  }
+
+  function alSave() {
+    var dest = alDestSelect.value;
+    if (!dest) return;
+    var sources = {};
+    Object.keys(alNewSources).forEach(function (n) {
+      // faqat hozir ro'yxatda qolgan bandlar uchun yuboriladi
+      for (var i = 0; i < alWorkingList.length; i++) {
+        if (alWorkingList[i].name === n) { sources[n] = alNewSources[n]; return; }
+      }
+    });
+    alSaveBtn.disabled = true;
+    alSetStatus("Saqlanmoqda...");
+    fetch(SEND_ENDPOINT + "/admin/checklist-save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        login: siteAuth.login,
+        pass: siteAuth.pass,
+        dest: dest,
+        items: alWorkingList,
+        sources: sources,
+      }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data.ok) {
+          alSaveBtn.disabled = false;
+          alSetStatus("Xato: " + (data.error || "noma'lum"), true);
+          return;
+        }
+        // Mahalliy holatni ham darhol yangilaymiz (qayta yuklamasdan ko'rinsin)
+        DEST_CHECKLISTS[dest] = alWorkingList.map(function (it) { return { name: it.name, unit: it.unit }; });
+        alWorkingList.forEach(function (it) { if (it.unit) GLOBAL_UNITS[it.name] = it.unit; });
+        Object.keys(sources).forEach(function (n) { adminSourceMap[n] = sources[n]; productSourceMap[n] = sources[n]; });
+        var known = {};
+        RAW_NAMES.forEach(function (n) { known[n] = true; });
+        alWorkingList.forEach(function (it) { if (!known[it.name]) RAW_NAMES.push(it.name); });
+        rebuildCatalogIndexes();
+        updateCountLabel();
+        alNewSources = {};
+        alMarkDirty(false);
+        alRenderCurrent();
+        alSetStatus("✅ Saqlandi — " + data.count + " ta mahsulot" + (data.tagged ? ", " + data.tagged + " ta ombor belgilandi" : "") + ". Xodimlar saytni qayta ochganda ko'radi.");
+      })
+      .catch(function () {
+        alSaveBtn.disabled = false;
+        alSetStatus("Internet aloqasi bilan muammo. Qayta urinib ko'ring.", true);
+      });
+  }
+
+  alDestSelect.addEventListener("change", function () {
+    if (alDirty && !confirm("Saqlanmagan o'zgarish bor. Boshqa qabul qiluvchiga o'tsangiz yo'qoladi. Davom etasizmi?")) {
+      return;
+    }
+    alLoadDest(alDestSelect.value);
+  });
+  alSearchInput.addEventListener("input", function () { alRenderSearch(alSearchInput.value); });
+  alSaveBtn.addEventListener("click", alSave);
+
+  tabAdminListBtn.addEventListener("click", function () {
+    setMode("adminlist");
+    if (!alDestSelect.options.length) {
+      allDestsList().forEach(function (d) {
+        var opt = document.createElement("option");
+        opt.value = d;
+        opt.textContent = d;
+        alDestSelect.appendChild(opt);
+      });
+      alLoadDest(alDestSelect.value);
+    }
+    loadAdminCatalog();
   });
 
   render("");
