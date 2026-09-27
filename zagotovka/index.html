@@ -2275,6 +2275,22 @@
     return alNewSources[name] || adminSourceMap[name] || "";
   }
 
+  function alInList(name) {
+    for (var i = 0; i < alWorkingList.length; i++) {
+      if (alWorkingList[i].name === name) return true;
+    }
+    return false;
+  }
+
+  // 2026-09-27 tuzatish: xabar sahifaning pastida (Saqlash tugmasidan keyin)
+  // chiqardi -- qidiruv natijasi bilan ishlayotganda umuman ko'rinmasdi
+  // ("nega qo'shib bo'lmayapti?" holati). Endi muhim xabarlar toast bo'lib
+  // ham chiqadi -- ekranning qayeridaligidan qat'i nazar ko'rinadi.
+  function alNotify(msg, isErr) {
+    alSetStatus(msg, isErr);
+    showToast(msg);
+  }
+
   function alRenderCurrent() {
     var dest = alDestSelect.value;
     alCurrentTitle.innerHTML = "Joriy ro'yxat — <b>" + alWorkingList.length + " ta</b>" +
@@ -2310,10 +2326,12 @@
       delBtn.title = "Ro'yxatdan olib tashlash";
       delBtn.textContent = "×";
       delBtn.addEventListener("click", function () {
+        var removed = alWorkingList[idx].name;
         alWorkingList.splice(idx, 1);
         alMarkDirty(true);
         alRenderCurrent();
-        alSetStatus("Olib tashlandi — saqlash uchun \"Saqlash\"ni bosing");
+        alRenderSearch(alSearchInput.value); // olib tashlangani qidiruvda yana "+ Qo'shish" bo'lsin
+        alNotify("🗑 \"" + removed + "\" olib tashlandi — saqlashni unutmang");
       });
 
       li.appendChild(nameSpan);
@@ -2325,19 +2343,18 @@
   }
 
   function alAddProduct(name, unit, source) {
-    for (var i = 0; i < alWorkingList.length; i++) {
-      if (alWorkingList[i].name === name) {
-        alSetStatus("\"" + name + "\" ro'yxatda allaqachon bor", true);
-        return;
-      }
+    if (alInList(name)) {
+      alNotify("\"" + name + "\" bu ro'yxatda (" + alDestSelect.value + ") allaqachon bor", true);
+      return;
     }
     if (source) alNewSources[name] = source;
     alWorkingList.push({ name: name, unit: unit || "" });
     alMarkDirty(true);
     alRenderCurrent();
-    alSearchInput.value = "";
-    alRenderSearch("");
-    alSetStatus("✅ \"" + name + "\" qo'shildi — saqlash uchun \"Saqlash\"ni bosing");
+    // Qidiruv matni SAQLANADI -- ketma-ket bir nechta o'xshash mahsulot
+    // qo'shish qulay bo'lsin deb; qo'shilgani natijada "✓ Ro'yxatda" bo'lib turadi.
+    alRenderSearch(alSearchInput.value);
+    alNotify("✅ \"" + name + "\" qo'shildi — saqlashni unutmang");
   }
 
   function alShowSourcePicker(li, name, unit) {
@@ -2394,16 +2411,26 @@
       var addBtn = document.createElement("button");
       addBtn.className = "al-btn al-add";
       addBtn.type = "button";
-      addBtn.textContent = "+ Qo'shish";
-      addBtn.addEventListener("click", function () {
-        if (alSourceOf(name)) {
-          alAddProduct(name, unit, null);
-        } else {
-          // Ombor (manba) belgilanmagan bo'lsa -- накладnoy yaratilmaydi,
-          // shuning uchun darhol shu yerda so'raymiz.
-          alShowSourcePicker(li, name, unit);
-        }
-      });
+      if (alInList(name)) {
+        // 2026-09-27 tuzatish: allaqachon ro'yxatda bo'lgan mahsulot endi
+        // DARHOL ko'rinadi -- avval tugma oddiy "+ Qo'shish" bo'lib turardi
+        // va bosilganda hech narsa bo'lmayotgandek tuyulardi.
+        li.classList.remove("al-new");
+        addBtn.disabled = true;
+        addBtn.style.cssText = "background:var(--surface);color:var(--text-muted);border:1.5px solid var(--border);cursor:default";
+        addBtn.textContent = "✓ Ro'yxatda";
+      } else {
+        addBtn.textContent = "+ Qo'shish";
+        addBtn.addEventListener("click", function () {
+          if (alSourceOf(name)) {
+            alAddProduct(name, unit, null);
+          } else {
+            // Ombor (manba) belgilanmagan bo'lsa -- накладnoy yaratilmaydi,
+            // shuning uchun darhol shu yerda so'raymiz.
+            alShowSourcePicker(li, name, unit);
+          }
+        });
+      }
 
       li.appendChild(nameSpan);
       li.appendChild(unitSpan);
@@ -2497,7 +2524,7 @@
         alNewSources = {};
         alMarkDirty(false);
         alRenderCurrent();
-        alSetStatus("✅ Saqlandi — " + data.count + " ta mahsulot" + (data.tagged ? ", " + data.tagged + " ta ombor belgilandi" : "") + ". Xodimlar saytni qayta ochganda ko'radi.");
+        alNotify("✅ Saqlandi — " + data.count + " ta mahsulot" + (data.tagged ? ", " + data.tagged + " ta ombor belgilandi" : "") + ". Xodimlar saytni qayta ochganda ko'radi.");
       })
       .catch(function () {
         alSaveBtn.disabled = false;
